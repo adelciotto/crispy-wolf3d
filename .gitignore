@@ -41,27 +41,16 @@
 ehthumbs.db
 Thumbs.db
 
-# Unnecessary project clutter #
-###############################
-*.layout
-*.depend
+# Wolf3D Data files #
+#####################
+data/**
+!**/.gitkeep
 
-# Dev-CPP Files & Folders #
-##############
-/obj
-Wolf4SDL_private.h
-Wolf4SDL_private.rc
-Makefile.win
-
-# Dev-CPP Files & Folders #
-##############
-*.o
-*.d
-*.wl6
-
-
-
-
+# cmake/clion files and directories #
+#####################################
+.idea
+cmake-build-debug
+cmake-build-release
 
 # VS Files & Folders #
 ##############
@@ -69,6 +58,7 @@ Makefile.win
 /debug
 /.vs
 /libraries
+/out
 
 # VS Code Files & Folders #
 ##############
