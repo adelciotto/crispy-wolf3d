@@ -197,7 +197,7 @@ void SimpleScaleShape(int xcenter, int shapenum, int height)
         {
             linecmds = &linesrc[shape->dataofs[i - shape->leftpix]];
 
-            ScaleLine(x1, toppix, fracstep, linesrc, linecmds, NULL);
+            ScaleLine(x1, toppix, fracstep, linesrc, linecmds);
 
             x1++;
         }

@@ -13,6 +13,7 @@ file(GLOB SOURCE_FILES
 file(GLOB HEADER_FILES
         ${PROJECT_SOURCE_DIR}/src/mame/*.h
         ${PROJECT_SOURCE_DIR}/src/dosbox/*.h
+        ${PROJECT_SOURCE_DIR}/src/stb/*.h
         ${PROJECT_SOURCE_DIR}/src/crispy/*.h
         ${PROJECT_SOURCE_DIR}/src/*.h)
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})

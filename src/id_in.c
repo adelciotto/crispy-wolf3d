@@ -19,6 +19,7 @@
 
 #include "wl_def.h"
 #include "crispy/config.h"
+#include "crispy/video.h"
 
 /*
 =============================================================================
@@ -34,7 +35,7 @@
 // configuration variables
 //
 boolean MousePresent;
-boolean forcegrabmouse;
+boolean forcegrabmouse = false;
 
 volatile boolean KeyboardState[129];
 
@@ -617,6 +618,12 @@ static void processEvent(SDL_Event *event)
             return;
         }
 
+        if (event->key.keysym.sym == SDLK_PRINTSCREEN && LastScan != SDLK_PRINTSCREEN)
+        {
+            CrispyVideoScreenshot((const char *)configdir);
+            return;
+        }
+
         LastScan = event->key.keysym.sym;
         SDL_Keymod mod = SDL_GetModState();
         if (Keyboard(sc_Alt))
@@ -1050,7 +1057,7 @@ int IN_MouseButtons(void)
         return 0;
 }
 
-bool IN_IsInputGrabbed()
+boolean IN_IsInputGrabbed()
 {
     return GrabInput;
 }

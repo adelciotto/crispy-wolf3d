@@ -14,4 +14,6 @@ void CrispyVideoSwapSurfaces();
 
 void CrispyVideoPresent();
 
+void CrispyVideoScreenshot(const char *configDir);
+
 #endif // CRISPY_WOLF3D_VIDEO_H

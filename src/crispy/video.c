@@ -1,6 +1,9 @@
 #include "video.h"
 
 #include <stdbool.h>
+#include <time.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "../stb/stb_image_write.h"
 
 #include "log.h"
 #include "config.h"
@@ -27,6 +30,8 @@ static SDL_Texture *screenTexture = NULL;
 
 static int screenWidth, screenHeight;
 static int actualScreenHeight;
+
+static bool takingScreenshot = false;
 
 static int getScreenTextureUpscale(int *widthUpscale, int *heightUpscale);
 
@@ -210,6 +215,56 @@ void CrispyVideoPresent()
     SDL_RenderCopy(renderer, screenTexture, NULL, NULL);
 
     SDL_RenderPresent(renderer);
+}
+
+void CrispyVideoScreenshot(const char *configDir)
+{
+    if (takingScreenshot)
+        return;
+
+    takingScreenshot = true;
+
+    char imagePath[300];
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+
+    if (configDir[0])
+        snprintf(imagePath, sizeof(imagePath), "%s/%s_%d-%02d-%02dT%02d-%02d-02d.png", configDir, "screenshot",
+                 tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    else
+        snprintf(imagePath, sizeof(imagePath), "%s_%d-%02d-%02dT%02d-%02d-%02d.png", "screenshot", tm.tm_year + 1900,
+                 tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+    int comp = 3;
+    int w, h;
+    if (SDL_GetRendererOutputSize(renderer, &w, &h) != 0)
+    {
+        CrispyLogError("Failed to get the renderer output size: %s", SDL_GetError());
+        return;
+    }
+
+    int stride = w * comp;
+    unsigned char *pixels = malloc(h * stride);
+    if (!pixels)
+    {
+        CrispyLogError("Failed to get malloc pixel buffer for screenshot");
+        return;
+    }
+
+    if (SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_RGB24, pixels, stride) != 0)
+    {
+        CrispyLogError("Failed to read renderer pixels: %s", SDL_GetError());
+        return;
+    }
+
+    if (stbi_write_png(imagePath, w, h, comp, pixels, stride) == 0)
+        CrispyLogError("Failed to save screenshot");
+    else
+        CrispyLogInfo("Screenshot saved to %s!", imagePath);
+
+    free(pixels);
+
+    takingScreenshot = false;
 }
 
 static int limitScreenTextureSize(int *widthUpscale, int *heightUpscale)

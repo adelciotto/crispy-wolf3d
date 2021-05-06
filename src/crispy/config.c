@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <sys/stat.h>
 
 #include "log.h"
@@ -14,7 +15,7 @@
 bool CrispyConfigFullscreen = true;
 bool CrispyConfigHighRes = true;
 bool CrispyConfigAspectRatioCorrection = true;
-unsigned int CrispyConfigWindowScale = 2;
+unsigned int CrispyConfigWindowScale = 1;
 
 static struct CrispyConfigOpt options[] = {
     {.name = "fullscreen", .type = CRISPY_CONFIG_OPT_TYPE_BOOL, .boolValue = &CrispyConfigFullscreen},

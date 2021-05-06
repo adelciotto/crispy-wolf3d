@@ -250,6 +250,6 @@ void IN_StartAck(void);
 
 boolean IN_CheckAck(void);
 
-bool IN_IsInputGrabbed();
+boolean IN_IsInputGrabbed();
 
 #endif

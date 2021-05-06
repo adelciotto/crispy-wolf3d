@@ -1465,24 +1465,32 @@ static void DemoLoop()
 
 #define IFARG(str) if (!strcmp(arg, (str)))
 
-#define PARSE_BOOL_ARG(arg, config) { \
-    if (++i >= argc) { \
-        CrispyLogError("The %s option is missing the boolean argument!", (arg)); \
-        hasError = true; \
-    } \
-    else { \
-        if (strcmp(argv[i], "true") == 0) { \
-            config = true; \
-        } else if (strcmp(argv[i], "false") == 0) { \
-            config = false; \
-        } else { \
-            CrispyLogError("The %s option argument must be 'true' or 'false'!", (arg)); \
-            hasError = true; \
-        } \
-    }                                 \
-    if (!hasError)                    \
-        CrispyLogInfo("Config %s option has been overridden to %s", (arg), argv[i]); \
-}
+#define PARSE_BOOL_ARG(arg, config)                                                                                    \
+    {                                                                                                                  \
+        if (++i >= argc)                                                                                               \
+        {                                                                                                              \
+            CrispyLogError("The %s option is missing the boolean argument!", (arg));                                   \
+            hasError = true;                                                                                           \
+        }                                                                                                              \
+        else                                                                                                           \
+        {                                                                                                              \
+            if (strcmp(argv[i], "true") == 0)                                                                          \
+            {                                                                                                          \
+                config = true;                                                                                         \
+            }                                                                                                          \
+            else if (strcmp(argv[i], "false") == 0)                                                                    \
+            {                                                                                                          \
+                config = false;                                                                                        \
+            }                                                                                                          \
+            else                                                                                                       \
+            {                                                                                                          \
+                CrispyLogError("The %s option argument must be 'true' or 'false'!", (arg));                            \
+                hasError = true;                                                                                       \
+            }                                                                                                          \
+        }                                                                                                              \
+        if (!hasError)                                                                                                 \
+            CrispyLogInfo("Config %s option has been overridden to %s", (arg), argv[i]);                               \
+    }
 
 void CheckParameters(int argc, char *argv[])
 {
@@ -1650,13 +1658,14 @@ void CheckParameters(int argc, char *argv[])
                "Usage: crispy-wolf3d [options]\n"
                "Options:\n"
                " --help                             This help page\n"
-               " --fullscreen <switch>              Switch to decide if game runs in fullscreen."
-                                                    "Can be 'true' or 'false'\n"
+               " --fullscreen <switch>              Switch to decide if game runs in fullscreen"
+               "Can be 'true' or 'false'\n"
+               " --window_scale <scale>             Set the scale of the window (1-4)\n"
                " --grab_mouse                       Grabs the mouse in windowed mode. Always on if fullscreen'\n"
-               " --high_res <switch>                Switch to decide if game runs in high res (640x400) or "
-                                                    "low res (320x200) mode. Can be 'true' or 'false'\n"
-               " --aspect_ratio_correction <switch> Switch to decide if game runs in high res (640x400) or "
-                                                    "low res (320x200) mode. Can be 'true' or 'false'\n"
+               " --high_res <switch>                Switch to decide if game runs in high res (640x400) or \n"
+               "low res (320x200) mode. Can be 'true' or 'false'\n"
+               " --aspect_ratio_correction <switch> Switch to decide if game uses 4:3 aspect ratio correction\n"
+               "Can be 'true' or 'false'\n"
                " --tedlevel <level>                 Starts the game in the given level\n"
                " --baby                             Sets the difficulty to baby for tedlevel\n"
                " --easy                             Sets the difficulty to easy for tedlevel\n"
