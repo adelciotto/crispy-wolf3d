@@ -1,6 +1,7 @@
 // WL_PLAY.C
 
 #include "wl_def.h"
+#include "crispy/config.h"
 
 #pragma hdrstop
 
@@ -73,8 +74,9 @@ void *demobuffer;
 //
 // current user input
 //
-int controlx, controly; // range from -100 to 100 per tic
-int controlstrafe;
+int controlx, controly;  // range from -100 to 100 per tic
+int modernMouseControlX;
+int controlStrafe;
 boolean buttonstate[NUMBUTTONS];
 
 int lastgamemusicoffset = 0;
@@ -209,6 +211,12 @@ void PollKeyboardButtons(void)
     for (i = 0; i < NUMBUTTONS; i++)
         if (Keyboard(buttonscan[i]))
             buttonstate[i] = true;
+
+    if (CrispyConfigModernKeyboardMouse)
+    {
+        if (Keyboard(sc_E))
+            buttonstate[bt_use] = true;
+    }
 }
 
 /*
@@ -219,6 +227,7 @@ void PollKeyboardButtons(void)
 ===================
 */
 
+// TODO(Anthony): Support mouse wheel scroll weapon change
 void PollMouseButtons(void)
 {
     int buttons = IN_MouseButtons();
@@ -289,14 +298,29 @@ void PollKeyboardMove(void)
 {
     int delta = buttonstate[bt_run] ? RUNMOVE * tics : BASEMOVE * tics;
 
-    if (Keyboard(dirscan[di_north]))
-        controly -= delta;
-    if (Keyboard(dirscan[di_south]))
-        controly += delta;
-    if (Keyboard(dirscan[di_west]))
-        controlx -= delta;
-    if (Keyboard(dirscan[di_east]))
-        controlx += delta;
+    if (CrispyConfigModernKeyboardMouse)
+    {
+        if (Keyboard(sc_W))
+            controly -= delta;
+        if (Keyboard(sc_S))
+            controly += delta;
+
+        if (Keyboard(sc_A))
+            controlStrafe -= delta;
+        if (Keyboard(sc_D))
+            controlStrafe += delta;
+    }
+    else
+    {
+        if (Keyboard(dirscan[di_north]))
+            controly -= delta;
+        if (Keyboard(dirscan[di_south]))
+            controly += delta;
+        if (Keyboard(dirscan[di_west]))
+            controlx -= delta;
+        if (Keyboard(dirscan[di_east]))
+            controlx += delta;
+    }
 }
 
 /*
@@ -306,14 +330,34 @@ void PollKeyboardMove(void)
 =
 ===================
 */
+static int AccelerateMouse(int val)
+{
+    if (val < 0)
+        return -AccelerateMouse(-val);
+
+    if (val > CrispyConfigMouseThreshold)
+    {
+        return (int)((val - CrispyConfigMouseThreshold) * CrispyConfigMouseAccel + CrispyConfigMouseThreshold);
+    }
+
+    return val;
+}
 
 void PollMouseMove(void)
 {
     int mousexmove, mouseymove;
     SDL_GetRelativeMouseState(&mousexmove, &mouseymove);
 
-    controlx += mousexmove * 10 / (13 - mouseadjustment);
-    controly += mouseymove * 20 / (13 - mouseadjustment);
+    if (CrispyConfigModernKeyboardMouse)
+    {
+        mousexmove = AccelerateMouse(mousexmove);
+        modernMouseControlX += mousexmove * 20 / (21 - mouseadjustment);
+    }
+    else
+    {
+        controlx += mousexmove * 10 / (13 - mouseadjustment);
+        controly += mouseymove * 20 / (13 - mouseadjustment);
+    }
 }
 
 /*
@@ -371,9 +415,9 @@ void PollGameControllerMove(void)
         controly -= delta;
 
     if (ljx > 64)
-        controlstrafe += delta;
+        controlStrafe += delta;
     else if (ljx < -64)
-        controlstrafe -= delta;
+        controlStrafe -= delta;
 }
 
 /*
@@ -420,7 +464,8 @@ void PollControls(void)
 
     controlx = 0;
     controly = 0;
-    controlstrafe = 0;
+    modernMouseControlX = 0;
+    controlStrafe = 0;
     memcpy(buttonheld, buttonstate, sizeof(buttonstate));
     memset(buttonstate, 0, sizeof(buttonstate));
 
@@ -493,10 +538,10 @@ void PollControls(void)
 
     max = 100 * tics;
     min = -max;
-    if (controlstrafe > max)
-        controlstrafe = max;
-    else if (controlstrafe < min)
-        controlstrafe = min;
+    if (controlStrafe > max)
+        controlStrafe = max;
+    else if (controlStrafe < min)
+        controlStrafe = min;
 
     if (demorecord)
     {

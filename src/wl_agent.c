@@ -1,6 +1,7 @@
 // WL_AGENT.C
 
 #include "wl_def.h"
+#include "crispy/config.h"
 
 #pragma hdrstop
 
@@ -218,6 +219,9 @@ void ControlMovement(objtype *ob)
         // not strafing
         //
         anglefrac += controlx;
+        if (CrispyConfigModernKeyboardMouse)
+            anglefrac += modernMouseControlX;
+
         angleunits = anglefrac / ANGLESCALE;
         anglefrac -= angleunits * ANGLESCALE;
         ob->angle -= angleunits;
@@ -228,25 +232,25 @@ void ControlMovement(objtype *ob)
             ob->angle += ANGLES;
     }
 
-    // controlstrafe value is only set by modern control schemes (game controller, modern keyboard/mouse).
-    if (controlstrafe < 0)
+    // controlStrafe value is only set by modern control schemes (game controller, modern keyboard/mouse).
+    if (controlStrafe < 0)
     {
         angle = ob->angle + ANGLES / 4;
         if (angle >= ANGLES)
             angle -= ANGLES;
 
-        int32_t speed = -controlstrafe * BACKMOVESCALE;
+        int32_t speed = -controlStrafe * BACKMOVESCALE;
         if (controly != 0)
             speed = (speed * 70) / 100; // correct faster diagonal movement
         Thrust(angle, speed);           // move to left
     }
-    else if (controlstrafe > 0)
+    else if (controlStrafe > 0)
     {
         angle = ob->angle - ANGLES / 4;
         if (angle < 0)
             angle += ANGLES;
 
-        int32_t speed = controlstrafe * BACKMOVESCALE;
+        int32_t speed = controlStrafe * BACKMOVESCALE;
         if (controly != 0)
             speed = (speed * 70) / 100; // correct faster diagonal movement
         Thrust(angle, speed);           // move to right
@@ -258,7 +262,7 @@ void ControlMovement(objtype *ob)
     if (controly < 0)
     {
         int32_t speed = -controly * MOVESCALE;
-        if (controlstrafe != 0)
+        if (controlStrafe != 0)
             speed = (speed * 70) / 100; // correct faster diagonal movement
         Thrust(ob->angle, speed);       // move forwards
     }
@@ -269,7 +273,7 @@ void ControlMovement(objtype *ob)
             angle -= ANGLES;
 
         int32_t speed = controly * MOVESCALE;
-        if (controlstrafe != 0)
+        if (controlStrafe != 0)
             speed = (speed * 70) / 100; // correct faster diagonal movement
         Thrust(angle, speed);           // move backwards
     }

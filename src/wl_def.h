@@ -1434,8 +1434,9 @@ extern int viewsize;
 //
 // current user input
 //
-extern int controlx, controly; // range from -100 to 100
-extern int controlstrafe;
+extern int controlx, controly;  // range from -100 to 100
+extern int modernMouseControlX;
+extern int controlStrafe;
 extern boolean buttonstate[NUMBUTTONS];
 
 extern boolean demorecord, demoplayback;

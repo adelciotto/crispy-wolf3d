@@ -6,7 +6,8 @@
 enum CrispyConfigOptType
 {
     CRISPY_CONFIG_OPT_TYPE_UINT,
-    CRISPY_CONFIG_OPT_TYPE_BOOL
+    CRISPY_CONFIG_OPT_TYPE_BOOL,
+    CRISPY_CONFIG_OPT_TYPE_FLOAT
 };
 
 struct CrispyConfigOpt
@@ -16,6 +17,7 @@ struct CrispyConfigOpt
     union {
         unsigned int *uintValue;
         bool *boolValue;
+        float *floatValue;
     };
 };
 
@@ -23,6 +25,10 @@ extern bool CrispyConfigFullscreen;
 extern bool CrispyConfigHighRes;
 extern bool CrispyConfigAspectRatioCorrection;
 extern unsigned int CrispyConfigWindowScale;
+
+extern bool CrispyConfigModernKeyboardMouse;
+extern unsigned int CrispyConfigMouseThreshold;
+extern float CrispyConfigMouseAccel;
 
 void CrispyConfigRead(const char *configDir);
 

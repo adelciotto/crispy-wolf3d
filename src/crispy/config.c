@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <math.h>
 #include <sys/stat.h>
 
 #include "log.h"
@@ -17,13 +18,23 @@ bool CrispyConfigHighRes = true;
 bool CrispyConfigAspectRatioCorrection = true;
 unsigned int CrispyConfigWindowScale = 1;
 
+bool CrispyConfigModernKeyboardMouse = true;
+unsigned int CrispyConfigMouseThreshold = 10;
+float CrispyConfigMouseAccel = 1.0f;
+
 static struct CrispyConfigOpt options[] = {
     {.name = "fullscreen", .type = CRISPY_CONFIG_OPT_TYPE_BOOL, .boolValue = &CrispyConfigFullscreen},
     {.name = "high_res", .type = CRISPY_CONFIG_OPT_TYPE_BOOL, .boolValue = &CrispyConfigHighRes},
     {.name = "aspect_ratio_correction",
      .type = CRISPY_CONFIG_OPT_TYPE_BOOL,
      .boolValue = &CrispyConfigAspectRatioCorrection},
-    {.name = "window_scale", .type = CRISPY_CONFIG_OPT_TYPE_UINT, .uintValue = &CrispyConfigWindowScale}};
+    {.name = "window_scale", .type = CRISPY_CONFIG_OPT_TYPE_UINT, .uintValue = &CrispyConfigWindowScale},
+
+    {.name = "modern_keyboard_mouse",
+     .type = CRISPY_CONFIG_OPT_TYPE_BOOL,
+     .boolValue = &CrispyConfigModernKeyboardMouse},
+    {.name = "mouse_threshold", .type = CRISPY_CONFIG_OPT_TYPE_UINT, .uintValue = &CrispyConfigMouseThreshold},
+    {.name = "mouse_accel", .type = CRISPY_CONFIG_OPT_TYPE_FLOAT, .floatValue = &CrispyConfigMouseAccel}};
 
 static struct CrispyConfigOpt *FindConfigOpt(char *name);
 static int ReadConfigOpt(struct CrispyConfigOpt *configOpt, char *value);
@@ -118,6 +129,9 @@ void CrispyConfigSave(const char *configDir)
             const char *valueStr = *option.boolValue ? "true" : "false";
             fprintf(file, "%s=%s", option.name, valueStr);
             break;
+        case CRISPY_CONFIG_OPT_TYPE_FLOAT:
+            fprintf(file, "%s=%.1f", option.name, *option.floatValue);
+            break;
         }
         }
 
@@ -156,6 +170,20 @@ int StrToUint(const char *s, unsigned int *out)
     return 0;
 }
 
+int StrToFloat(const char *s, float *out)
+{
+    char *endptr;
+    errno = 0;
+    float val = strtof(s, &endptr);
+
+    // overflow? no conversion? trailing junk?
+    if (errno || endptr == s || *endptr)
+        return -1;
+
+    *out = val;
+    return 0;
+}
+
 static int ReadConfigOpt(struct CrispyConfigOpt *configOpt, char *value)
 {
     switch (configOpt->type)
@@ -188,6 +216,23 @@ static int ReadConfigOpt(struct CrispyConfigOpt *configOpt, char *value)
         }
 
         *configOpt->boolValue = boolValue;
+        break;
+    }
+    case CRISPY_CONFIG_OPT_TYPE_FLOAT: {
+        float floatValue;
+        if (StrToFloat(value, &floatValue) != 0)
+        {
+            CrispyLogError("Failed to parse float option value %s", value);
+            return -1;
+        }
+
+        if (floatValue == 0.0f || isnan(floatValue) || isinf(floatValue))
+        {
+            CrispyLogError("Float option must have a valid positive value, got: %s", value);
+            return -1;
+        }
+
+        *configOpt->floatValue = floatValue;
         break;
     }
     }

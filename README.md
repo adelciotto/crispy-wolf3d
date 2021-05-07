@@ -158,6 +158,8 @@ All new crispy options can be configured via the `crispy-wolf3d.cfg` text file. 
 | `--grab_mouse`                       | Grabs the mouse in windowed mode. Always on if fullscreen                                                    | N/A                     |
 | `--high_res <switch>`                | Switch to decide if game runs in high res (640x400) or low res (320x200) mode                                | Boolean (true or false) |
 | `--aspect_ratio_correction <switch>` | Switch to decide if game uses 4:3 aspect ratio correction                                                    | Boolean (true or false) |
+| `--modern_mouse_keyboard <switch>`   | Enables modern keyboard and mouse controls (WASD move, mouse look)                                           | Boolean (true or false) |
+| `--aspect_ratio_correction <switch>` | Switch to decide if game uses 4:3 aspect ratio correction                                                    | Boolean (true or false) |
 | `--tedlevel <level>`                 | Starts the game in the given level                                                                           | Unsigned int            |
 | `--baby`                             | Sets the difficulty to baby for `tedlevel`                                                                   | N/A                     |
 | `--easy`                             | Sets the difficulty to easy for `tedlevel`                                                                   | N/A                     |
@@ -194,6 +196,26 @@ Here is the button layout for controllers. This is not currently customizable.
 | Menu                  | Start                         |
 
 *Note: When using a controller, the game now supports moving and strafing at the same time.*
+
+### Modern Mouse/Keyboard Support
+
+Here is the control scheme when using modern mouse/keyboard.
+
+| Action                | Button                        |
+|-----------------------|-------------------------------|
+| Move Forward          | W                             |
+| Move Backward         | S                             |
+| Strafe Left           | A                             |
+| Strafe Right          | D                             |
+| Look Left/Right       | Mouse X-Axis                  |
+| Use                   | E or Space                    |
+| Shoot                 | Left-Click                    |
+| Sprint                | Left-Shift                    |
+| Cycle Prev Weapon     | 1                             |
+| Cycle Next Weapon     | 2                             |
+| Menu                  | Escape                        |
+
+*Note: When using modern mouse/keyboard, the game now supports moving and strafing at the same time.*
 
 ### Screenshots
 

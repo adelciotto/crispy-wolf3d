@@ -1476,11 +1476,11 @@ static void DemoLoop()
         {                                                                                                              \
             if (strcmp(argv[i], "true") == 0)                                                                          \
             {                                                                                                          \
-                config = true;                                                                                         \
+                (config) = true;                                                                                       \
             }                                                                                                          \
             else if (strcmp(argv[i], "false") == 0)                                                                    \
             {                                                                                                          \
-                config = false;                                                                                        \
+                (config) = false;                                                                                      \
             }                                                                                                          \
             else                                                                                                       \
             {                                                                                                          \
@@ -1559,6 +1559,10 @@ void CheckParameters(int argc, char *argv[])
         else IFARG("--aspect_ratio_correction")
         {
             PARSE_BOOL_ARG("aspect_ratio_correction", CrispyConfigAspectRatioCorrection);
+        }
+        else IFARG("--modern_keyboard_mouse")
+        {
+            PARSE_BOOL_ARG("modern_keyboard_mouse", CrispyConfigModernKeyboardMouse);
         }
         else IFARG("--joystick")
         {
@@ -1652,43 +1656,45 @@ void CheckParameters(int argc, char *argv[])
         if (hasError)
             printf("\n");
 
-        printf("crispy-wolf3d by Anthony Del Ciotto\n"
-               "Based on Wolf4SDL (ported by Chaos-Software with additions by the community)\n"
-               "Original Wolfenstein 3D by id Software\n\n"
-               "Usage: crispy-wolf3d [options]\n"
-               "Options:\n"
-               " --help                             This help page\n"
-               " --fullscreen <switch>              Switch to decide if game runs in fullscreen"
-               "Can be 'true' or 'false'\n"
-               " --window_scale <scale>             Set the scale of the window (1-4)\n"
-               " --grab_mouse                       Grabs the mouse in windowed mode. Always on if fullscreen'\n"
-               " --high_res <switch>                Switch to decide if game runs in high res (640x400) or \n"
-               "low res (320x200) mode. Can be 'true' or 'false'\n"
-               " --aspect_ratio_correction <switch> Switch to decide if game uses 4:3 aspect ratio correction\n"
-               "Can be 'true' or 'false'\n"
-               " --tedlevel <level>                 Starts the game in the given level\n"
-               " --baby                             Sets the difficulty to baby for tedlevel\n"
-               " --easy                             Sets the difficulty to easy for tedlevel\n"
-               " --normal                           Sets the difficulty to normal for tedlevel\n"
-               " --hard                             Sets the difficulty to hard for tedlevel\n"
-               " --nowait                           Skips intro screens\n"
-               " --joystick <index>                 Use the index-th joystick if available\n"
-               "                                    (-1 to disable joystick, default: 0)\n"
-               " --joystickhat <index>              Enables movement with the given coolie hat\n"
-               " --samplerate <rate>                Sets the sound sample rate (given in Hz, default: %i)\n"
-               " --audiobuffer <size>               Sets the size of the audio buffer (-> sound latency)\n"
-               "                                    (given in bytes, default: 2048 / (44100 / samplerate))\n"
-               " --ignorenumchunks                  Ignores the number of chunks in VGAHEAD.*\n"
-               "                                    (may be useful for some broken mods)\n"
-               " --configdir <dir>                  Directory where config file and save games are stored\n"
-               "                                    (default: $HOME/.wolf4sdl)\n"
+        printf(
+            "crispy-wolf3d by Anthony Del Ciotto\n"
+            "Based on Wolf4SDL (ported by Chaos-Software with additions by the community)\n"
+            "Original Wolfenstein 3D by id Software\n\n"
+            "Usage: crispy-wolf3d [options]\n"
+            "Options:\n"
+            " --help                             This help page\n"
+            " --fullscreen <switch>              Switch to decide if game runs in fullscreen"
+            "Can be 'true' or 'false'\n"
+            " --window_scale <scale>             Set the scale of the window (1-4)\n"
+            " --grab_mouse                       Grabs the mouse in windowed mode. Always on if fullscreen'\n"
+            " --high_res <switch>                Switch to decide if game runs in high res (640x400) or \n"
+            "low res (320x200) mode. Can be 'true' or 'false'\n"
+            " --aspect_ratio_correction <switch> Switch to decide if game uses 4:3 aspect ratio correction\n"
+            "Can be 'true' or 'false'\n"
+            " --modern_keyboard_mouse            Enables modern keyboard and mouse controls (WASD move, mouse look)\n"
+            " --tedlevel <level>                 Starts the game in the given level\n"
+            " --baby                             Sets the difficulty to baby for tedlevel\n"
+            " --easy                             Sets the difficulty to easy for tedlevel\n"
+            " --normal                           Sets the difficulty to normal for tedlevel\n"
+            " --hard                             Sets the difficulty to hard for tedlevel\n"
+            " --nowait                           Skips intro screens\n"
+            " --joystick <index>                 Use the index-th joystick if available\n"
+            "                                    (-1 to disable joystick, default: 0)\n"
+            " --joystickhat <index>              Enables movement with the given coolie hat\n"
+            " --samplerate <rate>                Sets the sound sample rate (given in Hz, default: %i)\n"
+            " --audiobuffer <size>               Sets the size of the audio buffer (-> sound latency)\n"
+            "                                    (given in bytes, default: 2048 / (44100 / samplerate))\n"
+            " --ignorenumchunks                  Ignores the number of chunks in VGAHEAD.*\n"
+            "                                    (may be useful for some broken mods)\n"
+            " --configdir <dir>                  Directory where config file and save games are stored\n"
+            "                                    (default: $HOME/.wolf4sdl)\n"
 #if defined(SPEAR) && !defined(SPEARDEMO)
-               " --mission <mission>    Mission number to play (0-3)\n"
-               "                        (default: 0 -> .sod, 1-3 -> .sd*)\n"
-               " --goodtimes            Disable copy protection quiz\n"
+            " --mission <mission>    Mission number to play (0-3)\n"
+            "                        (default: 0 -> .sod, 1-3 -> .sd*)\n"
+            " --goodtimes            Disable copy protection quiz\n"
 #endif
-               ,
-               defaultSampleRate);
+            ,
+            defaultSampleRate);
         exit(1);
     }
 
