@@ -85,7 +85,7 @@ statinfo_t statinfo[] = {
 #ifndef SPEAR
     {SPR_STAT_40, block}, // Call Apogee          spr7v
 #else
-    {SPR_STAT_40},        // Red light
+    {SPR_STAT_40}, // Red light
 #endif
     //
     // NEW PAGE

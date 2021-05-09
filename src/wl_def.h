@@ -1424,7 +1424,7 @@ extern int lastgamemusicoffset;
 extern boolean mouseenabled, joystickenabled;
 extern int dirscan[4];
 extern int buttonscan[NUMBUTTONS];
-extern int buttonmouse[4];
+extern int buttonmouse[5];
 extern int buttonjoy[32];
 
 extern boolean buttonheld[NUMBUTTONS];

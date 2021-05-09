@@ -15,11 +15,6 @@ void Quit(const char *error, ...);
 //===========================================================================
 
 extern SDL_Surface *screen, *screenBuffer;
-#if SDL_MAJOR_VERSION == 2
-extern SDL_Window *window;
-extern SDL_Renderer *renderer;
-extern SDL_Texture *texture;
-#endif
 
 extern boolean usedoublebuffering;
 extern unsigned screenWidth, screenHeight, screenPitch, bufferPitch;

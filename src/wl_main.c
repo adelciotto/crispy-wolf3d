@@ -41,7 +41,7 @@ extern byte signon[];
 */
 
 #define FOCALLENGTH (0x5700l) // in global coordinates
-#define VIEWGLOBAL 0x10000    // globals visable flush to wall
+#define VIEWGLOBAL 0x10000 // globals visable flush to wall
 
 #define VIEWWIDTH 256 // size of view window
 #define VIEWHEIGHT 144
