@@ -100,22 +100,19 @@
 //
 // TYPEDEFS
 //
-typedef struct
-{
-    short x, y, amount, curpos, indent;
+typedef struct {
+	short x, y, amount, curpos, indent;
 } CP_iteminfo;
 
-typedef struct
-{
-    short active;
-    char string[36];
+typedef struct {
+	short active;
+	char string[36];
 
-    int (*routine)(int temp1);
+	int (*routine)(int temp1);
 } CP_itemtype;
 
-typedef struct
-{
-    short allowed[4];
+typedef struct {
+	short allowed[4];
 } CustomCtrls;
 
 extern CP_itemtype MainMenu[];
@@ -165,7 +162,8 @@ void CheckSecretMissions(void);
 
 void BossKey(void);
 
-void DrawGun(CP_iteminfo *item_i, CP_itemtype *items, int x, int *y, int which, int basey, void (*routine)(int w));
+void DrawGun(CP_iteminfo *item_i, CP_itemtype *items, int x, int *y, int which,
+			 int basey, void (*routine)(int w));
 
 void DrawHalfStep(int x, int y);
 
@@ -183,7 +181,8 @@ void DefineKeyBtns(void);
 
 void DefineKeyMove(void);
 
-void EnterCtrlData(int index, CustomCtrls *cust, void (*DrawRtn)(int), void (*PrintRtn)(int), int type);
+void EnterCtrlData(int index, CustomCtrls *cust, void (*DrawRtn)(int),
+				   void (*PrintRtn)(int), int type);
 
 void DrawMainMenu(void);
 
@@ -259,41 +258,33 @@ void CheckForEpisodes(void);
 
 void FreeMusic(void);
 
-enum
-{
-    MOUSE,
-    JOYSTICK,
-    KEYBOARDBTNS,
-    KEYBOARDMOVE
-}; // FOR INPUT TYPES
+enum { MOUSE, JOYSTICK, KEYBOARDBTNS, KEYBOARDMOVE }; // FOR INPUT TYPES
 
-enum menuitems
-{
-    newgame,
-    soundmenu,
-    control,
-    loadgame,
-    savegame,
-    changeview,
+enum menuitems {
+	newgame,
+	soundmenu,
+	control,
+	loadgame,
+	savegame,
+	changeview,
 
 #ifndef GOODTIMES
 #ifndef SPEAR
-    readthis,
+	readthis,
 #endif
 #endif
 
-    viewscores,
-    backtodemo,
-    quit
+	viewscores,
+	backtodemo,
+	quit
 };
 
 //
 // WL_INTER
 //
-typedef struct
-{
-    int kill, secret, treasure;
-    int32_t time;
+typedef struct {
+	int kill, secret, treasure;
+	int32_t time;
 } LRstruct;
 
 extern LRstruct LevelRatios[];

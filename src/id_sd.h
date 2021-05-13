@@ -12,30 +12,19 @@
 
 #define TickBase 70 // 70Hz per tick - used as a base for timer 0
 
-typedef enum
-{
-    sdm_Off,
-    sdm_PC,
-    sdm_AdLib,
+typedef enum {
+	sdm_Off,
+	sdm_PC,
+	sdm_AdLib,
 } SDMode;
 
-typedef enum
-{
-    smm_Off,
-    smm_AdLib
-} SMMode;
+typedef enum { smm_Off, smm_AdLib } SMMode;
 
-typedef enum
-{
-    sds_Off,
-    sds_PC,
-    sds_SoundBlaster
-} SDSMode;
+typedef enum { sds_Off, sds_PC, sds_SoundBlaster } SDSMode;
 
-typedef struct
-{
-    longword length;
-    word priority;
+typedef struct {
+	longword length;
+	word priority;
 } SoundCommon;
 
 #define ORIG_SOUNDCOMMON_SIZE 6
@@ -47,10 +36,9 @@ typedef struct
 
 #define pcSpkBits 3
 
-typedef struct
-{
-    SoundCommon common;
-    byte data[1];
+typedef struct {
+	SoundCommon common;
+	byte data[1];
 } PCSound;
 
 //      Register addresses
@@ -67,23 +55,22 @@ typedef struct
 // Global stuff
 #define alEffects 0xbd
 
-typedef struct
-{
-    byte mChar, cChar, mScale, cScale, mAttack, cAttack, mSus, cSus, mWave, cWave, nConn,
+typedef struct {
+	byte mChar, cChar, mScale, cScale, mAttack, cAttack, mSus, cSus, mWave,
+			cWave, nConn,
 
-        // These are only for Muse - these bytes are really unused
-        voice, mode;
-    byte unused[3];
+			// These are only for Muse - these bytes are really unused
+			voice, mode;
+	byte unused[3];
 } Instrument;
 
 #define ORIG_INSTRUMENT_SIZE 16
 
-typedef struct
-{
-    SoundCommon common;
-    Instrument inst;
-    byte block;
-    byte data[1];
+typedef struct {
+	SoundCommon common;
+	Instrument inst;
+	byte block;
+	byte data[1];
 } AdLibSound;
 
 #define ORIG_ADLIBSOUND_SIZE (ORIG_SOUNDCOMMON_SIZE + ORIG_INSTRUMENT_SIZE + 2)
@@ -93,22 +80,19 @@ typedef struct
 //
 #define sqMaxTracks 10
 
-typedef struct
-{
-    word length;
-    word values[1];
+typedef struct {
+	word length;
+	word values[1];
 } MusicGroup;
 
-typedef struct
-{
-    int valid;
-    fixed globalsoundx, globalsoundy;
+typedef struct {
+	int valid;
+	fixed globalsoundx, globalsoundy;
 } globalsoundpos;
 
-typedef struct
-{
-    uint32_t startpage;
-    uint32_t length;
+typedef struct {
+	uint32_t startpage;
+	uint32_t length;
 } digiinfo;
 
 extern globalsoundpos channelSoundPos[];

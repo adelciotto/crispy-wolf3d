@@ -16,16 +16,14 @@
 
 #define MAXSHIFTS 1
 
-typedef struct
-{
-    int16_t width, height;
+typedef struct {
+	int16_t width, height;
 } pictabletype;
 
-typedef struct
-{
-    int16_t height;
-    int16_t location[256];
-    int8_t width[256];
+typedef struct {
+	int16_t height;
+	int16_t location[256];
+	int8_t width[256];
 } fontstruct;
 
 //===========================================================================
@@ -37,9 +35,9 @@ extern byte fontcolor, backcolor;
 extern int fontnumber;
 extern int px, py;
 
-#define SETFONTCOLOR(f, b)                                                                                             \
-    fontcolor = f;                                                                                                     \
-    backcolor = b;
+#define SETFONTCOLOR(f, b)                                                     \
+	fontcolor = f;                                                             \
+	backcolor = b;
 
 //
 // mode independant routines
@@ -101,7 +99,7 @@ void VW_MeasurePropString(const char *string, word *width, word *height);
 
 void VH_Startup();
 
-boolean FizzleFade(SDL_Surface *source, int x1, int y1, unsigned width, unsigned height, unsigned frames,
-                   boolean abortable);
+boolean FizzleFade(SDL_Surface *source, int x1, int y1, unsigned width,
+				   unsigned height, unsigned frames, boolean abortable);
 
 #endif

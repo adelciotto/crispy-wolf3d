@@ -86,10 +86,12 @@ void VL_DrawPicBare(int x, int y, byte *pic, int width, int height);
 
 void VL_ScreenToScreen(SDL_Surface *source, SDL_Surface *dest);
 
-void VL_MemToScreenScaledCoord(byte *source, int width, int height, int scx, int scy);
+void VL_MemToScreenScaledCoord(byte *source, int width, int height, int scx,
+							   int scy);
 
-void VL_MemToScreenScaledCoord2(byte *source, int origwidth, int origheight, int srcx, int srcy, int destx, int desty,
-                                int width, int height);
+void VL_MemToScreenScaledCoord2(byte *source, int origwidth, int origheight,
+								int srcx, int srcy, int destx, int desty,
+								int width, int height);
 
 void VL_MemToScreen(byte *source, int width, int height, int x, int y);
 

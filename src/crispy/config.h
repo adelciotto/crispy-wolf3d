@@ -3,35 +3,33 @@
 
 #include <stdbool.h>
 
-enum CrispyConfigOptType
-{
-    CRISPY_CONFIG_OPT_TYPE_UINT,
-    CRISPY_CONFIG_OPT_TYPE_BOOL,
-    CRISPY_CONFIG_OPT_TYPE_FLOAT
-};
+typedef enum CrispyConfigOptType {
+	CRISPY_CONFIG_OPT_TYPE_UINT,
+	CRISPY_CONFIG_OPT_TYPE_BOOL,
+	CRISPY_CONFIG_OPT_TYPE_FLOAT
+} CrispyConfigOptType;
 
-struct CrispyConfigOpt
-{
-    const char *name;
-    enum CrispyConfigOptType type;
-    union {
-        unsigned int *uintValue;
-        bool *boolValue;
-        float *floatValue;
-    };
-};
+typedef struct CrispyConfigOpt {
+	const char *name;
+	enum CrispyConfigOptType type;
 
-extern bool CrispyConfigFullscreen;
-extern bool CrispyConfigHighRes;
-extern bool CrispyConfigAspectRatioCorrection;
-extern unsigned int CrispyConfigWindowScale;
+	union {
+		unsigned int *uintValue;
+		bool *boolValue;
+		float *floatValue;
+	};
+} CrispyConfigOpt;
 
-extern bool CrispyConfigModernKeyboardMouse;
-extern unsigned int CrispyConfigMouseThreshold;
-extern float CrispyConfigMouseAccel;
+extern bool g_crispyConfigFullscreen;
+extern bool g_crispyConfigHighRes;
+extern bool g_crispyConfigAspectRatioCorrection;
+extern unsigned int g_crispyConfigWindowScale;
 
-void CrispyConfigRead(const char *configDir);
+extern bool g_crispyConfigModernKeyboardMouse;
+extern unsigned int g_crispyConfigMouseThreshold;
+extern float g_crispyConfigMouseAccel;
 
-void CrispyConfigSave(const char *configDir);
+void crispyConfigRead(const char *configDir);
+void crispyConfigSave(const char *configDir);
 
 #endif // CRISPY_WOLF3D_CONFIG_H

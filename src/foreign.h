@@ -1,24 +1,24 @@
 #ifndef __FOREIGN_H_
 #define __FOREIGN_H_
 
-#define QUITSUR                                                                                                        \
-    "Are you sure you want\n"                                                                                          \
-    "to quit this great game?"
+#define QUITSUR                                                                \
+	"Are you sure you want\n"                                                  \
+	"to quit this great game?"
 
-#define CURGAME                                                                                                        \
-    "You are currently in\n"                                                                                           \
-    "a game. Continuing will\n"                                                                                        \
-    "erase old game. Ok?"
+#define CURGAME                                                                \
+	"You are currently in\n"                                                   \
+	"a game. Continuing will\n"                                                \
+	"erase old game. Ok?"
 
-#define GAMESVD                                                                                                        \
-    "There's already a game\n"                                                                                         \
-    "saved at this position.\n"                                                                                        \
-    "      Overwrite?"
+#define GAMESVD                                                                \
+	"There's already a game\n"                                                 \
+	"saved at this position.\n"                                                \
+	"      Overwrite?"
 
-#define ENDGAMESTR                                                                                                     \
-    "Are you sure you want\n"                                                                                          \
-    "to end the game you\n"                                                                                            \
-    "are playing? (Y or N):"
+#define ENDGAMESTR                                                             \
+	"Are you sure you want\n"                                                  \
+	"to end the game you\n"                                                    \
+	"are playing? (Y or N):"
 
 #define STR_NG "New Game"
 #define STR_SD "Sound"
@@ -116,25 +116,52 @@
 #define STR_SEEAGAIN "Let's see that again!"
 
 #ifdef SPEAR
-#define ENDSTR1 "Heroes don't quit, but\ngo ahead and press " YESBUTTONNAME "\nif you aren't one."
-#define ENDSTR2 "Press " YESBUTTONNAME " to quit,\nor press " NOBUTTONNAME " to enjoy\nmore violent diversion."
-#define ENDSTR3 "Depressing the " YESBUTTONNAME " key means\nyou must return to the\nhumdrum workday world."
-#define ENDSTR4 "Hey, quit or play,\n" YESBUTTONNAME " or " NOBUTTONNAME ":\nit's your choice."
+#define ENDSTR1                                                                \
+	"Heroes don't quit, but\ngo ahead and press " YESBUTTONNAME                \
+	"\nif you aren't one."
+#define ENDSTR2                                                                \
+	"Press " YESBUTTONNAME " to quit,\nor press " NOBUTTONNAME                 \
+	" to enjoy\nmore violent diversion."
+#define ENDSTR3                                                                \
+	"Depressing the " YESBUTTONNAME                                            \
+	" key means\nyou must return to the\nhumdrum workday world."
+#define ENDSTR4                                                                \
+	"Hey, quit or play,\n" YESBUTTONNAME " or " NOBUTTONNAME                   \
+	":\nit's your choice."
 #define ENDSTR5 "Sure you don't want to\nwaste a few more\nproductive hours?"
-#define ENDSTR6 "I think you had better\nplay some more. Please\npress " NOBUTTONNAME "...please?"
-#define ENDSTR7 "If you are tough, press " NOBUTTONNAME ".\nIf not, press " YESBUTTONNAME " daintily."
-#define ENDSTR8 "I'm thinkin' that\nyou might wanna press " NOBUTTONNAME "\nto play more. You do it."
-#define ENDSTR9 "Sure. Fine. Quit.\nSee if we care.\nGet it over with.\nPress " YESBUTTONNAME "."
+#define ENDSTR6                                                                \
+	"I think you had better\nplay some more. Please\npress " NOBUTTONNAME      \
+	"...please?"
+#define ENDSTR7                                                                \
+	"If you are tough, press " NOBUTTONNAME ".\nIf not, press " YESBUTTONNAME  \
+	" daintily."
+#define ENDSTR8                                                                \
+	"I'm thinkin' that\nyou might wanna press " NOBUTTONNAME                   \
+	"\nto play more. You do it."
+#define ENDSTR9                                                                   \
+	"Sure. Fine. Quit.\nSee if we care.\nGet it over with.\nPress " YESBUTTONNAME \
+	"."
 #else
 #define ENDSTR1 "Dost thou wish to\nleave with such hasty\nabandon?"
 #define ENDSTR2 "Chickening out...\nalready?"
-#define ENDSTR3 "Press " NOBUTTONNAME " for more carnage.\nPress " YESBUTTONNAME " to be a weenie."
+#define ENDSTR3                                                                \
+	"Press " NOBUTTONNAME " for more carnage.\nPress " YESBUTTONNAME           \
+	" to be a weenie."
 #define ENDSTR4 "So, you think you can\nquit this easily, huh?"
-#define ENDSTR5 "Press " NOBUTTONNAME " to save the world.\nPress " YESBUTTONNAME " to abandon it in\nits hour of need."
-#define ENDSTR6 "Press " NOBUTTONNAME " if you are brave.\nPress " YESBUTTONNAME " to cower in shame."
-#define ENDSTR7 "Heroes, press " NOBUTTONNAME ".\nWimps, press " YESBUTTONNAME "."
-#define ENDSTR8 "You are at an intersection.\nA sign says, 'Press " YESBUTTONNAME " to quit.'\n>"
-#define ENDSTR9 "For guns and glory, press " NOBUTTONNAME ".\nFor work and worry, press " YESBUTTONNAME "."
+#define ENDSTR5                                                                \
+	"Press " NOBUTTONNAME " to save the world.\nPress " YESBUTTONNAME          \
+	" to abandon it in\nits hour of need."
+#define ENDSTR6                                                                \
+	"Press " NOBUTTONNAME " if you are brave.\nPress " YESBUTTONNAME           \
+	" to cower in shame."
+#define ENDSTR7                                                                \
+	"Heroes, press " NOBUTTONNAME ".\nWimps, press " YESBUTTONNAME "."
+#define ENDSTR8                                                                \
+	"You are at an intersection.\nA sign says, 'Press " YESBUTTONNAME          \
+	" to quit.'\n>"
+#define ENDSTR9                                                                \
+	"For guns and glory, press " NOBUTTONNAME                                  \
+	".\nFor work and worry, press " YESBUTTONNAME "."
 #endif
 
 #endif

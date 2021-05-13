@@ -50,7 +50,8 @@
 #define STR_NOPE6 "Well, I'm sure you just \"misplaced\" the manual..."
 #define STR_NOPE7 "Run me again when you've boned up on your manual a bit."
 #define STR_NOPE8 "Nice try, but no Spear."
-#define STR_NOPE9 "That information is in the Spear of Destiny manual, by the way."
+#define STR_NOPE9                                                              \
+	"That information is in the Spear of Destiny manual, by the way."
 
 #define STR_MISC1 "Under \"Killing the Enemy\", what"
 #define STR_MISC2 "type of enemy is pictured?"

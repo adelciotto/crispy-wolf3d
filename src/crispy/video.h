@@ -3,17 +3,27 @@
 
 #include "SDL.h"
 
-int CrispyVideoStart();
-void CrispyVideoShutdown();
+#include <stdbool.h>
 
-SDL_Surface *CrispyVideoGetRGBASurface();
-SDL_Surface *CrispyVideoGetPalettedSurface();
-void CrispyVideoGetScreenSize(int *w, int *h);
-void CrispyVideoSetPaletteColors(SDL_Color *colors, int first, int numColors);
-void CrispyVideoSwapSurfaces();
+int crispyVideoStart();
+void crispyVideoShutdown();
+bool crispyVideoGetFullscreen();
+void crispyVideoSetFullscreen(bool toggleOn);
+int crispyVideoGetWindowScale();
+void crispyVideoSetWindowScale(int scale);
+bool crispyVideoGetAspectRatioCorrection();
+void crispyVideoSetAspectRatioCorrection(bool toggleOn);
+void crispyVideoSetHighRes(bool toggleOn);
+int crispyVideoApply();
 
-void CrispyVideoPresent();
+SDL_Surface *crispyVideoGetRGBASurface();
+SDL_Surface *crispyVideoGetPaletteSurface();
+void crispyVideoGetScreenSize(int *w, int *h);
+void crispyVideoSetPaletteColors(SDL_Color *colors, int first, int numColors);
+void crispyVideoSwapSurfaces();
 
-void CrispyVideoScreenshot(const char *configDir);
+void crispyVideoPresent();
+
+void crispyVideoScreenshot(const char *configDir);
 
 #endif // CRISPY_WOLF3D_VIDEO_H

@@ -70,7 +70,7 @@ typedef int ScanCode;
 #define sc_F12 SDLK_F12
 
 #define sc_ScrollLock SDLK_SCROLLOCK
-#define sc_PrintScreen SDLK_PRINT
+#define sc_PrintScreen SDLK_PRINTSCREEN
 
 #define sc_1 SDLK_1
 #define sc_2 SDLK_2
@@ -112,65 +112,53 @@ typedef int ScanCode;
 
 #define key_None 0
 
-typedef enum
-{
-    demo_Off,
-    demo_Record,
-    demo_Playback,
-    demo_PlayDone
-} Demo;
-typedef enum
-{
-    ctrl_Keyboard,
-    ctrl_Keyboard1 = ctrl_Keyboard,
-    ctrl_Keyboard2,
-    ctrl_Joystick,
-    ctrl_Joystick1 = ctrl_Joystick,
-    ctrl_Joystick2,
-    ctrl_Mouse
+typedef enum { demo_Off, demo_Record, demo_Playback, demo_PlayDone } Demo;
+typedef enum {
+	ctrl_Keyboard,
+	ctrl_Keyboard1 = ctrl_Keyboard,
+	ctrl_Keyboard2,
+	ctrl_Joystick,
+	ctrl_Joystick1 = ctrl_Joystick,
+	ctrl_Joystick2,
+	ctrl_Mouse
 } ControlType;
-typedef enum
-{
-    motion_Left = -1,
-    motion_Up = -1,
-    motion_None = 0,
-    motion_Right = 1,
-    motion_Down = 1
+typedef enum {
+	motion_Left = -1,
+	motion_Up = -1,
+	motion_None = 0,
+	motion_Right = 1,
+	motion_Down = 1
 } Motion;
-typedef enum
-{
-    dir_North,
-    dir_NorthEast,
-    dir_East,
-    dir_SouthEast,
-    dir_South,
-    dir_SouthWest,
-    dir_West,
-    dir_NorthWest,
-    dir_None
+typedef enum {
+	dir_North,
+	dir_NorthEast,
+	dir_East,
+	dir_SouthEast,
+	dir_South,
+	dir_SouthWest,
+	dir_West,
+	dir_NorthWest,
+	dir_None
 } Direction;
-typedef struct
-{
-    boolean button0, button1, button2, button3;
-    short x, y;
-    Motion xaxis, yaxis;
-    Direction dir;
+typedef struct {
+	boolean button0, button1, button2, button3;
+	short x, y;
+	Motion xaxis, yaxis;
+	Direction dir;
 } CursorInfo;
 typedef CursorInfo ControlInfo;
-typedef struct
-{
-    ScanCode button0, button1, upleft, up, upright, left, right, downleft, down, downright;
+typedef struct {
+	ScanCode button0, button1, upleft, up, upright, left, right, downleft, down,
+			downright;
 } KeyboardDef;
-typedef struct
-{
-    word joyMinX, joyMinY, threshMinX, threshMinY, threshMaxX, threshMaxY, joyMaxX, joyMaxY, joyMultXL, joyMultYL,
-        joyMultXH, joyMultYH;
+typedef struct {
+	word joyMinX, joyMinY, threshMinX, threshMinY, threshMaxX, threshMaxY,
+			joyMaxX, joyMaxY, joyMultXL, joyMultYL, joyMultXH, joyMultYH;
 } JoystickDef;
 
-typedef enum
-{
-    gameControllerAxis_Left,
-    gameControllerAxis_Right
+typedef enum {
+	gameControllerAxis_Left,
+	gameControllerAxis_Right
 } GameControllerAxis;
 
 // Global variables
@@ -186,12 +174,12 @@ extern boolean forcegrabmouse;
 
 // Function prototypes
 #define IN_KeyDown(code) (Keyboard((code)))
-#define IN_ClearKey(code)                                                                                              \
-    {                                                                                                                  \
-        KeyboardSet(code, false);                                                                                      \
-        if (code == LastScan)                                                                                          \
-            LastScan = sc_None;                                                                                        \
-    }
+#define IN_ClearKey(code)                                                      \
+	{                                                                          \
+		KeyboardSet(code, false);                                              \
+		if (code == LastScan)                                                  \
+			LastScan = sc_None;                                                \
+	}
 
 // DEBUG - put names in prototypes
 extern void IN_Startup(void), IN_Shutdown(void);

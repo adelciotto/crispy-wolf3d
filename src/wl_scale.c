@@ -26,56 +26,54 @@
 ===================
 */
 
-void ScaleLine(int16_t x, int16_t toppix, fixed fracstep, byte *linesrc, byte *linecmds)
+void ScaleLine(int16_t x, int16_t toppix, fixed fracstep, byte *linesrc,
+			   byte *linecmds)
 {
-    byte *src, *dest;
-    byte col;
-    int16_t start, end, top;
-    int16_t startpix, endpix;
-    fixed frac;
+	byte *src, *dest;
+	byte col;
+	int16_t start, end, top;
+	int16_t startpix, endpix;
+	fixed frac;
 
-    for (end = READWORD(linecmds) >> 1; end; end = READWORD(linecmds) >> 1)
-    {
-        top = READWORD(linecmds + 2);
-        start = READWORD(linecmds + 4) >> 1;
+	for (end = READWORD(linecmds) >> 1; end; end = READWORD(linecmds) >> 1) {
+		top = READWORD(linecmds + 2);
+		start = READWORD(linecmds + 4) >> 1;
 
-        frac = start * fracstep;
+		frac = start * fracstep;
 
-        endpix = (frac >> FRACBITS) + toppix;
+		endpix = (frac >> FRACBITS) + toppix;
 
-        for (src = &linesrc[top + start]; start != end; start++, src++)
-        {
-            startpix = endpix;
+		for (src = &linesrc[top + start]; start != end; start++, src++) {
+			startpix = endpix;
 
-            if (startpix >= viewheight)
-                break; // off the bottom of the view area
+			if (startpix >= viewheight)
+				break; // off the bottom of the view area
 
-            frac += fracstep;
-            endpix = (frac >> FRACBITS) + toppix;
+			frac += fracstep;
+			endpix = (frac >> FRACBITS) + toppix;
 
-            if (endpix < 0)
-                continue; // not into the view area
+			if (endpix < 0)
+				continue; // not into the view area
 
-            if (startpix < 0)
-                startpix = 0; // clip upper boundary
+			if (startpix < 0)
+				startpix = 0; // clip upper boundary
 
-            if (endpix > viewheight)
-                endpix = viewheight; // clip lower boundary
+			if (endpix > viewheight)
+				endpix = viewheight; // clip lower boundary
 
-            col = *src;
+			col = *src;
 
-            dest = vbuf + ylookup[startpix] + x;
+			dest = vbuf + ylookup[startpix] + x;
 
-            while (startpix < endpix)
-            {
-                *dest = col;
-                dest += bufferPitch;
-                startpix++;
-            }
-        }
+			while (startpix < endpix) {
+				*dest = col;
+				dest += bufferPitch;
+				startpix++;
+			}
+		}
 
-        linecmds += 6; // next segment list
-    }
+		linecmds += 6; // next segment list
+	}
 }
 
 /*
@@ -90,63 +88,60 @@ void ScaleLine(int16_t x, int16_t toppix, fixed fracstep, byte *linesrc, byte *l
 
 void ScaleShape(int xcenter, int shapenum, int height, uint32_t flags)
 {
-    int i;
-    compshape_t *shape;
-    byte *linesrc, *linecmds;
-    int16_t scale, toppix;
-    int16_t x1, x2, actx;
-    fixed frac, fracstep;
+	int i;
+	compshape_t *shape;
+	byte *linesrc, *linecmds;
+	int16_t scale, toppix;
+	int16_t x1, x2, actx;
+	fixed frac, fracstep;
 
-    scale = height >> 3; // low three bits are fractional
+	scale = height >> 3; // low three bits are fractional
 
-    if (!scale)
-        return; // too close or far away
+	if (!scale)
+		return; // too close or far away
 
-    linesrc = PM_GetSpritePage(shapenum);
-    shape = (compshape_t *)linesrc;
+	linesrc = PM_GetSpritePage(shapenum);
+	shape = (compshape_t *)linesrc;
 
-    fracstep = FixedDiv(scale, TEXTURESIZE / 2);
-    frac = shape->leftpix * fracstep;
+	fracstep = FixedDiv(scale, TEXTURESIZE / 2);
+	frac = shape->leftpix * fracstep;
 
-    actx = xcenter - scale;
-    toppix = centery - scale;
+	actx = xcenter - scale;
+	toppix = centery - scale;
 
-    x2 = (frac >> FRACBITS) + actx;
+	x2 = (frac >> FRACBITS) + actx;
 
-    for (i = shape->leftpix; i <= shape->rightpix; i++)
-    {
-        //
-        // calculate edges of the shape
-        //
-        x1 = x2;
+	for (i = shape->leftpix; i <= shape->rightpix; i++) {
+		//
+		// calculate edges of the shape
+		//
+		x1 = x2;
 
-        if (x1 >= viewwidth)
-            break; // off the right side of the view area
+		if (x1 >= viewwidth)
+			break; // off the right side of the view area
 
-        frac += fracstep;
-        x2 = (frac >> FRACBITS) + actx;
+		frac += fracstep;
+		x2 = (frac >> FRACBITS) + actx;
 
-        if (x2 < 0)
-            continue; // not into the view area
+		if (x2 < 0)
+			continue; // not into the view area
 
-        if (x1 < 0)
-            x1 = 0; // clip left boundary
+		if (x1 < 0)
+			x1 = 0; // clip left boundary
 
-        if (x2 > viewwidth)
-            x2 = viewwidth; // clip right boundary
+		if (x2 > viewwidth)
+			x2 = viewwidth; // clip right boundary
 
-        while (x1 < x2)
-        {
-            if (wallheight[x1] < height)
-            {
-                linecmds = &linesrc[shape->dataofs[i - shape->leftpix]];
+		while (x1 < x2) {
+			if (wallheight[x1] < height) {
+				linecmds = &linesrc[shape->dataofs[i - shape->leftpix]];
 
-                ScaleLine(x1, toppix, fracstep, linesrc, linecmds);
-            }
+				ScaleLine(x1, toppix, fracstep, linesrc, linecmds);
+			}
 
-            x1++;
-        }
-    }
+			x1++;
+		}
+	}
 }
 
 /*
@@ -163,43 +158,41 @@ void ScaleShape(int xcenter, int shapenum, int height, uint32_t flags)
 
 void SimpleScaleShape(int xcenter, int shapenum, int height)
 {
-    int i;
-    compshape_t *shape;
-    byte *linesrc, *linecmds;
-    int16_t scale, toppix;
-    int16_t x1, x2, actx;
-    fixed frac, fracstep;
+	int i;
+	compshape_t *shape;
+	byte *linesrc, *linecmds;
+	int16_t scale, toppix;
+	int16_t x1, x2, actx;
+	fixed frac, fracstep;
 
-    scale = height >> 1;
+	scale = height >> 1;
 
-    linesrc = PM_GetSpritePage(shapenum);
-    shape = (compshape_t *)linesrc;
+	linesrc = PM_GetSpritePage(shapenum);
+	shape = (compshape_t *)linesrc;
 
-    fracstep = FixedDiv(scale, TEXTURESIZE / 2);
-    frac = shape->leftpix * fracstep;
+	fracstep = FixedDiv(scale, TEXTURESIZE / 2);
+	frac = shape->leftpix * fracstep;
 
-    actx = xcenter - scale;
-    toppix = centery - scale;
+	actx = xcenter - scale;
+	toppix = centery - scale;
 
-    x2 = (frac >> FRACBITS) + actx;
+	x2 = (frac >> FRACBITS) + actx;
 
-    for (i = shape->leftpix; i <= shape->rightpix; i++)
-    {
-        //
-        // calculate edges of the shape
-        //
-        x1 = x2;
+	for (i = shape->leftpix; i <= shape->rightpix; i++) {
+		//
+		// calculate edges of the shape
+		//
+		x1 = x2;
 
-        frac += fracstep;
-        x2 = (frac >> FRACBITS) + actx;
+		frac += fracstep;
+		x2 = (frac >> FRACBITS) + actx;
 
-        while (x1 < x2)
-        {
-            linecmds = &linesrc[shape->dataofs[i - shape->leftpix]];
+		while (x1 < x2) {
+			linecmds = &linesrc[shape->dataofs[i - shape->leftpix]];
 
-            ScaleLine(x1, toppix, fracstep, linesrc, linecmds);
+			ScaleLine(x1, toppix, fracstep, linesrc, linecmds);
 
-            x1++;
-        }
-    }
+			x1++;
+		}
+	}
 }

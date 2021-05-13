@@ -6,23 +6,21 @@
 #define NUMMAPS 60
 #define MAPPLANES 3
 
-#define UNCACHEAUDIOCHUNK(chunk)                                                                                       \
-    {                                                                                                                  \
-        if (audiosegs[chunk])                                                                                          \
-        {                                                                                                              \
-            free(audiosegs[chunk]);                                                                                    \
-            audiosegs[chunk] = NULL;                                                                                   \
-        }                                                                                                              \
-    }
+#define UNCACHEAUDIOCHUNK(chunk)                                               \
+	{                                                                          \
+		if (audiosegs[chunk]) {                                                \
+			free(audiosegs[chunk]);                                            \
+			audiosegs[chunk] = NULL;                                           \
+		}                                                                      \
+	}
 
 //===========================================================================
 
-typedef struct
-{
-    int32_t planestart[MAPPLANES];
-    word planelength[MAPPLANES];
-    word width, height;
-    char name[16];
+typedef struct {
+	int32_t planestart[MAPPLANES];
+	word planelength[MAPPLANES];
+	word width, height;
+	char name[16];
 } maptype;
 
 //===========================================================================
