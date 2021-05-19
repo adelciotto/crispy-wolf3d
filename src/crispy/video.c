@@ -41,7 +41,8 @@ static int setupScreen();
 int crispyVideoStart(const char *title)
 {
 	window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED,
-							  SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight,
+							  SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH,
+							  SCREEN_HEIGHT,
 							  SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_HIDDEN);
 	if (!window) {
 		crispyLogError("Unable to create SDL_Window %ix%i: %s", screenWidth,

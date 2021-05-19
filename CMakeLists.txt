@@ -24,7 +24,11 @@ set(CMAKE_C_STANDARD_REQUIRED YES)
 
 if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE
-            /D_CRT_SECURE_NO_WARNINGS $<$<CONFIG:DEBUG>:/DEBUG> $<$<CONFIG:RELEASE>:/O2>)
+            /D_CRT_SECURE_NO_WARNINGS $<$<CONFIG:DEBUG>:/DEBUG> $<$<CONFIG:RELEASE>:/O2>
+			# Statically link the runtime libraries
+            $<$<CONFIG:>:/MT>
+            $<$<CONFIG:Debug>:/MTd>
+            $<$<CONFIG:Release>:/MT>)
 else()
     target_compile_options(${PROJECT_NAME} PRIVATE
         -Wpointer-arith -Wreturn-type -Wwrite-strings -Wcast-align
