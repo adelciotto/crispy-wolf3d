@@ -1,5 +1,4 @@
 #include "wl_def.h"
-#include "crispy/video.h"
 
 pictabletype *pictable;
 
@@ -18,7 +17,7 @@ void VWB_DrawPropString(const char *string)
 	int i;
 	unsigned sx, sy;
 
-	dest = VL_LockSurface(screenBuffer);
+	dest = VL_LockSurface(screenSurface);
 	if (dest == NULL)
 		return;
 
@@ -45,7 +44,7 @@ void VWB_DrawPropString(const char *string)
 		}
 	}
 
-	VL_UnlockSurface(screenBuffer);
+	VL_UnlockSurface(screenSurface);
 }
 
 void VWL_MeasureString(const char *string, word *width, word *height,
@@ -72,8 +71,8 @@ void VW_MeasurePropString(const char *string, word *width, word *height)
 
 void VH_UpdateScreen(SDL_Surface *surface)
 {
-	SDL_BlitSurface(surface, NULL, screen, NULL);
-	crispyVideoPresent();
+	SDL_BlitSurface(surface, NULL, rgbaSurface, NULL);
+	VL_Present();
 }
 
 void VWB_DrawTile8(int x, int y, int tile)
@@ -228,7 +227,7 @@ boolean FizzleFade(SDL_Surface *source, int x1, int y1, unsigned width,
 			return true;
 		}
 
-		byte *destptr = VL_LockSurface(screen);
+		byte *destptr = VL_LockSurface(rgbaSurface);
 
 		if (destptr != NULL) {
 			rndval = lastrndval;
@@ -262,17 +261,18 @@ boolean FizzleFade(SDL_Surface *source, int x1, int y1, unsigned width,
 					//
 
 					if (screenBits == 8) {
-						*(destptr + (y1 + y) * screen->pitch + x1 + x) =
+						*(destptr + (y1 + y) * rgbaSurface->pitch + x1 + x) =
 								*(srcptr + (y1 + y) * source->pitch + x1 + x);
 					} else {
 						byte col =
 								*(srcptr + (y1 + y) * source->pitch + x1 + x);
 						uint32_t fullcol =
-								SDL_MapRGB(screen->format, curpal[col].r,
+								SDL_MapRGB(rgbaSurface->format, curpal[col].r,
 										   curpal[col].g, curpal[col].b);
-						memcpy(destptr + (y1 + y) * screen->pitch +
-									   (x1 + x) * screen->format->BytesPerPixel,
-							   &fullcol, screen->format->BytesPerPixel);
+						memcpy(destptr + (y1 + y) * rgbaSurface->pitch +
+									   (x1 +
+										x) * rgbaSurface->format->BytesPerPixel,
+							   &fullcol, rgbaSurface->format->BytesPerPixel);
 					}
 
 					if (rndval == 0) // entire sequence has been completed
@@ -287,8 +287,8 @@ boolean FizzleFade(SDL_Surface *source, int x1, int y1, unsigned width,
 			if (usedoublebuffering)
 				first = 0;
 
-			VL_UnlockSurface(screen);
-			crispyVideoPresent(screen);
+			VL_UnlockSurface(rgbaSurface);
+			VL_Present();
 		} else {
 			// No surface, so only enhance rndval
 			for (i = first; i < 2; i++) {
@@ -306,7 +306,7 @@ boolean FizzleFade(SDL_Surface *source, int x1, int y1, unsigned width,
 
 finished:
 	VL_UnlockSurface(source);
-	VL_UnlockSurface(screen);
+	VL_UnlockSurface(rgbaSurface);
 	VH_UpdateScreen(source);
 	return false;
 }

@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 
 #include "wl_def.h"
-#include "crispy/config.h"
+#include "id_config.h"
 
 #pragma hdrstop
 
@@ -1074,7 +1074,7 @@ static void InitGame()
 	// initialize SDL
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK |
 				 SDL_INIT_GAMECONTROLLER) < 0) {
-		crispyLogError("Unable to init SDL: %s\n", SDL_GetError());
+		LOG_Error("Unable to init SDL: %s\n", SDL_GetError());
 		exit(1);
 	}
 	atexit(SDL_Quit);
@@ -1083,10 +1083,10 @@ static void InitGame()
 	if (param_joystickindex &&
 		(param_joystickindex < -1 || param_joystickindex >= numJoysticks)) {
 		if (!numJoysticks)
-			crispyLogError("No joysticks are available to SDL!\n");
+			LOG_Error("No joysticks are available to SDL!\n");
 		else
-			crispyLogError("The joystick index must be between -1 and %i!\n",
-						   numJoysticks - 1);
+			LOG_Error("The joystick index must be between -1 and %i!\n",
+					  numJoysticks - 1);
 		exit(1);
 	}
 
@@ -1134,7 +1134,7 @@ static void InitGame()
 	IN_ProcessEvents();
 
 #ifndef SPEARDEMO
-	if (Keyboard(sc_M)) {
+	if (IN_KeyDown(sc_M)) {
 		DoJukebox();
 		didjukebox = true;
 	} else
@@ -1270,7 +1270,7 @@ void Quit(const char *errorStr, ...)
 #ifdef NOTYET
 			SetTextCursor(0, 0);
 #endif
-			crispyLogError("%s", error);
+			LOG_Error("%s", error);
 #ifdef NOTYET
 			SetTextCursor(0, 2);
 #endif
@@ -1298,7 +1298,7 @@ void Quit(const char *errorStr, ...)
 		memcpy((byte *)0xb8000, screen + 7, 7 * 160);
 		SetTextCursor(9, 3);
 #endif
-		crispyLogError("%s", error);
+		LOG_Error("%s", error);
 #ifdef NOTYET
 		SetTextCursor(0, 7);
 #endif
@@ -1448,7 +1448,7 @@ static void DemoLoop()
 		VW_FadeOut();
 
 #ifdef DEBUGKEYS
-		if (Keyboard(sc_Tab) && param_debugmode)
+		if (IN_KeyDown(sc_Tab) && param_debugmode)
 			RecordDemo();
 		else
 			US_ControlPanel(0);
@@ -1473,8 +1473,8 @@ static void DemoLoop()
 #define PARSE_BOOL_ARG(arg, config)                                            \
 	{                                                                          \
 		if (++i >= argc) {                                                     \
-			crispyLogError("The %s option is missing the boolean argument!",   \
-						   (arg));                                             \
+			LOG_Error("The %s option is missing the boolean argument!",        \
+					  (arg));                                                  \
 			hasError = true;                                                   \
 		} else {                                                               \
 			if (strcmp(argv[i], "true") == 0) {                                \
@@ -1482,15 +1482,14 @@ static void DemoLoop()
 			} else if (strcmp(argv[i], "false") == 0) {                        \
 				(config) = false;                                              \
 			} else {                                                           \
-				crispyLogError(                                                \
-						"The %s option argument must be 'true' or 'false'!",   \
-						(arg));                                                \
+				LOG_Error("The %s option argument must be 'true' or 'false'!", \
+						  (arg));                                              \
 				hasError = true;                                               \
 			}                                                                  \
 		}                                                                      \
 		if (!hasError)                                                         \
-			crispyLogInfo("Config %s option has been overridden to %s", (arg), \
-						  argv[i]);                                            \
+			LOG_Info("Config %s option has been overridden to %s", (arg),      \
+					 argv[i]);                                                 \
 	}
 
 void CheckParameters(int argc, char *argv[])
@@ -1515,7 +1514,7 @@ void CheckParameters(int argc, char *argv[])
 		else IFARG("--tedlevel")
 		{
 			if (++i >= argc) {
-				crispyLogError(
+				LOG_Error(
 						"The tedlevel option is missing the level argument!\n");
 				hasError = true;
 			} else
@@ -1523,7 +1522,7 @@ void CheckParameters(int argc, char *argv[])
 		}
 		else IFARG("--fullscreen")
 		{
-			PARSE_BOOL_ARG("fullscreen", g_crispyConfigFullscreen);
+			PARSE_BOOL_ARG("fullscreen", ConfigOptionFullscreen);
 		}
 		else IFARG("--grab_mouse")
 		{
@@ -1532,17 +1531,17 @@ void CheckParameters(int argc, char *argv[])
 		else IFARG("--window_scale")
 		{
 			if (++i >= argc) {
-				crispyLogError(
+				LOG_Error(
 						"The window_scale option is missing the scale argument!\n");
 				hasError = true;
 			} else {
 				int val = atoi(argv[i]);
 				if (val > 0 && val < 5) {
-					g_crispyConfigWindowScale = val;
-					crispyLogInfo("Config 'window_scale' overridden to %u",
-								  g_crispyConfigWindowScale);
+					ConfigOptionWindowScale = val;
+					LOG_Info("Config 'window_scale' overridden to %u",
+							 ConfigOptionWindowScale);
 				} else {
-					crispyLogError(
+					LOG_Error(
 							"The window_scale option argument must be an integer between 1 and 4!\n");
 					hasError = true;
 				}
@@ -1550,22 +1549,22 @@ void CheckParameters(int argc, char *argv[])
 		}
 		else IFARG("--high_res")
 		{
-			PARSE_BOOL_ARG("high_res", g_crispyConfigHighRes);
+			PARSE_BOOL_ARG("high_res", ConfigOptionHighRes);
 		}
 		else IFARG("--aspect_ratio_correction")
 		{
 			PARSE_BOOL_ARG("aspect_ratio_correction",
-						   g_crispyConfigAspectRatioCorrection);
+						   ConfigOptionAspectRatioCorrection);
 		}
 		else IFARG("--modern_keyboard_mouse")
 		{
 			PARSE_BOOL_ARG("modern_keyboard_mouse",
-						   g_crispyConfigModernKeyboardMouse);
+						   ConfigOptionModernKeyboardMouse);
 		}
 		else IFARG("--joystick")
 		{
 			if (++i >= argc) {
-				crispyLogError(
+				LOG_Error(
 						"The joystick option is missing the index argument!\n");
 				hasError = true;
 			} else
@@ -1575,7 +1574,7 @@ void CheckParameters(int argc, char *argv[])
 		else IFARG("--joystickhat")
 		{
 			if (++i >= argc) {
-				crispyLogError(
+				LOG_Error(
 						"The joystickhat option is missing the index argument!\n");
 				hasError = true;
 			} else
@@ -1584,7 +1583,7 @@ void CheckParameters(int argc, char *argv[])
 		else IFARG("--samplerate")
 		{
 			if (++i >= argc) {
-				crispyLogError(
+				LOG_Error(
 						"The samplerate option is missing the rate argument!\n");
 				hasError = true;
 			} else
@@ -1594,7 +1593,7 @@ void CheckParameters(int argc, char *argv[])
 		else IFARG("--audiobuffer")
 		{
 			if (++i >= argc) {
-				crispyLogError(
+				LOG_Error(
 						"The audiobuffer option is missing the size argument!\n");
 				hasError = true;
 			} else
@@ -1604,14 +1603,13 @@ void CheckParameters(int argc, char *argv[])
 		else IFARG("--mission")
 		{
 			if (++i >= argc) {
-				crispyLogError(
+				LOG_Error(
 						"The mission option is missing the mission argument!\n");
 				hasError = true;
 			} else {
 				param_mission = atoi(argv[i]);
 				if (param_mission < 0 || param_mission > 3) {
-					crispyLogError(
-							"The mission option must be between 0 and 3!\n");
+					LOG_Error("The mission option must be between 0 and 3!\n");
 					hasError = true;
 				}
 			}
@@ -1619,13 +1617,13 @@ void CheckParameters(int argc, char *argv[])
 		else IFARG("--configdir")
 		{
 			if (++i >= argc) {
-				crispyLogError(
+				LOG_Error(
 						"The configdir option is missing the dir argument!\n");
 				hasError = true;
 			} else {
 				size_t len = strlen(argv[i]);
 				if (len + 2 > sizeof(configdir)) {
-					crispyLogError("The config directory is too long!\n");
+					LOG_Error("The config directory is too long!\n");
 					hasError = true;
 				} else {
 					strcpy(configdir, argv[i]);
@@ -1723,7 +1721,7 @@ void FindOrCreateConfig()
 		}
 	}
 
-	crispyConfigRead((const char *)configdir);
+	CONFIG_Read((const char *)configdir);
 }
 
 /*

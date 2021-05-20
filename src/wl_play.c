@@ -1,7 +1,7 @@
 // WL_PLAY.C
 
 #include "wl_def.h"
-#include "crispy/config.h"
+#include "id_config.h"
 
 #pragma hdrstop
 
@@ -54,7 +54,8 @@ boolean mouseenabled, joystickenabled;
 int dirscan[4] = { sc_UpArrow, sc_RightArrow, sc_DownArrow, sc_LeftArrow };
 int buttonscan[NUMBUTTONS] = { sc_Control, sc_Alt, sc_LShift, sc_Space,
 							   sc_1,	   sc_2,   sc_3,	  sc_4 };
-int buttonmouse[4] = { bt_attack, bt_strafe, bt_use, bt_nobutton };
+int buttonmouse[5] = { bt_attack, bt_strafe, bt_use, bt_prevweapon,
+					   bt_nextweapon };
 int buttonjoy[32] = { bt_attack,	 bt_strafe,		 bt_use,	  bt_run,
 					  bt_strafeleft, bt_straferight, bt_esc,	  bt_pause,
 					  bt_prevweapon, bt_nextweapon,	 bt_nobutton, bt_nobutton,
@@ -222,11 +223,11 @@ void PollKeyboardButtons(void)
 	int i;
 
 	for (i = 0; i < NUMBUTTONS; i++)
-		if (Keyboard(buttonscan[i]))
+		if (IN_KeyDown(buttonscan[i]))
 			buttonstate[i] = true;
 
-	if (g_crispyConfigModernKeyboardMouse) {
-		if (Keyboard(sc_E))
+	if (ConfigOptionModernKeyboardMouse) {
+		if (IN_KeyDown(sc_E))
 			buttonstate[bt_use] = true;
 	}
 }
@@ -239,7 +240,6 @@ void PollKeyboardButtons(void)
 ===================
 */
 
-// TODO(Anthony): Support mouse wheel scroll weapon change
 void PollMouseButtons(void)
 {
 	int buttons = IN_MouseButtons();
@@ -250,6 +250,13 @@ void PollMouseButtons(void)
 		buttonstate[buttonmouse[1]] = true;
 	if (buttons & 4)
 		buttonstate[buttonmouse[2]] = true;
+
+	if (ConfigOptionModernKeyboardMouse) {
+		if (buttons & 8)
+			buttonstate[buttonmouse[3]] = true;
+		if (buttons & 16)
+			buttonstate[buttonmouse[4]] = true;
+	}
 }
 
 /*
@@ -308,24 +315,24 @@ void PollKeyboardMove(void)
 {
 	int delta = buttonstate[bt_run] ? RUNMOVE * tics : BASEMOVE * tics;
 
-	if (g_crispyConfigModernKeyboardMouse) {
-		if (Keyboard(sc_W))
+	if (ConfigOptionModernKeyboardMouse) {
+		if (IN_KeyDown(sc_W))
 			controly -= delta;
-		if (Keyboard(sc_S))
+		if (IN_KeyDown(sc_S))
 			controly += delta;
 
-		if (Keyboard(sc_A))
+		if (IN_KeyDown(sc_A))
 			controlStrafe -= delta;
-		if (Keyboard(sc_D))
+		if (IN_KeyDown(sc_D))
 			controlStrafe += delta;
 	} else {
-		if (Keyboard(dirscan[di_north]))
+		if (IN_KeyDown(dirscan[di_north]))
 			controly -= delta;
-		if (Keyboard(dirscan[di_south]))
+		if (IN_KeyDown(dirscan[di_south]))
 			controly += delta;
-		if (Keyboard(dirscan[di_west]))
+		if (IN_KeyDown(dirscan[di_west]))
 			controlx -= delta;
-		if (Keyboard(dirscan[di_east]))
+		if (IN_KeyDown(dirscan[di_east]))
 			controlx += delta;
 	}
 }
@@ -342,10 +349,10 @@ static int AccelerateMouse(int val)
 	if (val < 0)
 		return -AccelerateMouse(-val);
 
-	if (val > g_crispyConfigMouseThreshold) {
-		return (int)((val - g_crispyConfigMouseThreshold) *
-							 g_crispyConfigMouseAccel +
-					 g_crispyConfigMouseThreshold);
+	if (val > ConfigOptionMouseThreshold) {
+		return (int)((val - ConfigOptionMouseThreshold) *
+							 ConfigOptionMouseAccel +
+					 ConfigOptionMouseThreshold);
 	}
 
 	return val;
@@ -356,7 +363,7 @@ void PollMouseMove(void)
 	int mousexmove, mouseymove;
 	SDL_GetRelativeMouseState(&mousexmove, &mouseymove);
 
-	if (g_crispyConfigModernKeyboardMouse) {
+	if (ConfigOptionModernKeyboardMouse) {
 		mousexmove = AccelerateMouse(mousexmove);
 		modernMouseControlX += mousexmove * 20 / (21 - mouseadjustment);
 	} else {
@@ -615,7 +622,7 @@ void CheckKeys(void)
 	//
 	// SECRET CHEAT CODE: TAB-G-F10
 	//
-	if (Keyboard(sc_Tab) && Keyboard(sc_G) && Keyboard(sc_F10)) {
+	if (IN_KeyDown(sc_Tab) && IN_KeyDown(sc_G) && IN_KeyDown(sc_F10)) {
 		WindowH = 160;
 		if (godmode) {
 			Message("God mode OFF");
@@ -636,7 +643,7 @@ void CheckKeys(void)
 	//
 	// SECRET CHEAT CODE: 'MLI'
 	//
-	if (Keyboard(sc_M) && Keyboard(sc_L) && Keyboard(sc_I)) {
+	if (IN_KeyDown(sc_M) && IN_KeyDown(sc_L) && IN_KeyDown(sc_I)) {
 		gamestate.health = 100;
 		gamestate.ammo = 99;
 		gamestate.keys = 3;
@@ -666,8 +673,8 @@ void CheckKeys(void)
 	// OPEN UP DEBUG KEYS
 	//
 #ifdef DEBUGKEYS
-	if (Keyboard(sc_BackSpace) && Keyboard(sc_LShift) && Keyboard(sc_Alt) &&
-		param_debugmode) {
+	if (IN_KeyDown(sc_BackSpace) && IN_KeyDown(sc_LShift) &&
+		IN_KeyDown(sc_Alt) && param_debugmode) {
 		ClearMemory();
 		ClearSplitVWB();
 
@@ -683,7 +690,7 @@ void CheckKeys(void)
 	//
 	// TRYING THE KEEN CHEAT CODE!
 	//
-	if (Keyboard(sc_B) && Keyboard(sc_A) && Keyboard(sc_T)) {
+	if (IN_KeyDown(sc_B) && IN_KeyDown(sc_A) && IN_KeyDown(sc_T)) {
 		ClearMemory();
 		ClearSplitVWB();
 
@@ -705,6 +712,7 @@ void CheckKeys(void)
 	if (buttonstate[bt_pause])
 		Paused = true;
 	if (Paused) {
+		IN_UpdateMouseGrab();
 		int lastoffs = StopMusic();
 		VWB_DrawPic(16 * 8, 80 - 2 * 8, PAUSEDPIC);
 		VW_UpdateScreen();
@@ -763,7 +771,7 @@ void CheckKeys(void)
 // TAB-? debug keys
 //
 #ifdef DEBUGKEYS
-	if (Keyboard(sc_Tab) && DebugOk) {
+	if (IN_KeyDown(sc_Tab) && DebugOk) {
 		fontnumber = 0;
 		SETFONTCOLOR(0, 15);
 		if (DebugKeys() && viewsize < 20) {
@@ -1303,6 +1311,7 @@ void PlayLoop(void)
 			VW_FadeIn();
 
 		CheckKeys();
+		IN_UpdateMouseGrab();
 
 		//
 		// debug aids

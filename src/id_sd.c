@@ -454,12 +454,12 @@ int SD_PlayDigitized(word which, int leftpos, int rightpos)
 
 	Mix_Chunk *sample = SoundChunks[which];
 	if (sample == NULL) {
-		crispyLogError("SoundChunks[%i] is NULL!\n", which);
+		LOG_Error("SoundChunks[%i] is NULL!\n", which);
 		return 0;
 	}
 
 	if (Mix_PlayChannel(channel, sample, 0) == -1) {
-		crispyLogError("Unable to play sound: %s\n", Mix_GetError());
+		LOG_Error("Unable to play sound: %s\n", Mix_GetError());
 		return 0;
 	}
 
@@ -868,7 +868,7 @@ void SD_Startup(void)
 		return;
 
 	if (Mix_OpenAudio(param_samplerate, AUDIO_S16, 2, param_audiobuffer)) {
-		crispyLogError("Unable to open audio: %s\n", Mix_GetError());
+		LOG_Error("Unable to open audio: %s\n", Mix_GetError());
 		return;
 	}
 
@@ -881,7 +881,7 @@ void SD_Startup(void)
 			param_samplerate / 700; // SDL_t0FastAsmService played at 700Hz
 
 	if (YM3812Init(1, 3579545, param_samplerate)) {
-		crispyLogError("Unable to create virtual OPL!!\n");
+		LOG_Error("Unable to create virtual OPL!!\n");
 		return;
 	}
 

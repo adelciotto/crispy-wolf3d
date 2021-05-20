@@ -18,31 +18,18 @@
 //
 
 #include "wl_def.h"
-#include "crispy/config.h"
-#include "crispy/video.h"
-
-/*
-=============================================================================
-
-                    GLOBAL VARIABLES
-
-=============================================================================
-*/
 
 #define UNKNOWN_KEY KEYCOUNT
 
-//
-// configuration variables
-//
 boolean MousePresent;
 boolean forcegrabmouse = false;
 
-volatile boolean KeyboardState[129];
-
-// 	Global variables
+volatile boolean KeyboardState[KEYCOUNT];
 volatile boolean Paused;
 volatile char LastASCII;
 volatile ScanCode LastScan;
+
+int JoyNumButtons;
 
 // KeyboardDef	KbdDefs = {0x1d,0x38,0x47,0x48,0x49,0x4b,0x4d,0x4f,0x50,0x51};
 static KeyboardDef KbdDefs = {
@@ -58,21 +45,6 @@ static KeyboardDef KbdDefs = {
 	sc_PgDn // downright
 };
 
-static SDL_Joystick *Joystick;
-int JoyNumButtons;
-static int JoyNumHats;
-
-static SDL_GameController *GameController;
-
-static bool GrabInput = false;
-
-/*
-=============================================================================
-
-                    LOCAL VARIABLES
-
-=============================================================================
-*/
 byte ASCIINames[] = // Unshifted ASCII for scan codes       // TODO: keypad
 		{
 			//	 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
@@ -125,28 +97,45 @@ byte SpecialNames[] = // ASCII for 0xe0 prefixed codes
 			0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0,  0, 0, 0, // 6
 			0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0,  0, 0, 0 // 7
 		};
-
-static boolean IN_Started;
-
 static Direction DirTable[] = // Quick lookup for total direction
 		{ dir_NorthWest, dir_North,		dir_NorthEast, dir_West,	 dir_None,
 		  dir_East,		 dir_SouthWest, dir_South,	   dir_SouthEast };
 
-boolean Keyboard(int key)
+static boolean IN_Started;
+
+/*
+============================================================================
+
+                            Keyboard Functions
+
+============================================================================
+*/
+
+static int KeyboardRead(int key);
+static int KeyboardSet(int key, boolean state);
+
+void IN_ClearKeysDown(void)
 {
-	int keyIndex = KeyboardLookup(key);
+	LastScan = sc_None;
+	LastASCII = key_None;
+	memset((void *)KeyboardState, 0, sizeof(KeyboardState));
+}
+
+boolean IN_KeyDown(int key)
+{
+	int keyIndex = KeyboardRead(key);
 	return keyIndex != UNKNOWN_KEY ? KeyboardState[keyIndex] : false;
 }
 
-void KeyboardSet(int key, boolean state)
+void IN_ClearKey(int key)
 {
-	int keyIndex = KeyboardLookup(key);
-	if (keyIndex != UNKNOWN_KEY) {
-		KeyboardState[keyIndex] = state;
+	KeyboardSet(key, false);
+	if (key == LastScan) {
+		LastScan = sc_None;
 	}
 }
 
-int KeyboardLookup(int key)
+static int KeyboardRead(int key)
 {
 	switch (key) {
 	case SDLK_UNKNOWN:
@@ -412,32 +401,192 @@ int KeyboardLookup(int key)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-//	INL_GetMouseButtons() - Gets the status of the mouse buttons from the
-//		mouse driver
-//
-///////////////////////////////////////////////////////////////////////////
-static int INL_GetMouseButtons(void)
+static int KeyboardSet(int key, boolean state)
 {
-	int buttons = SDL_GetMouseState(NULL, NULL);
-	int middlePressed = buttons & SDL_BUTTON(SDL_BUTTON_MIDDLE);
-	int rightPressed = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
-	buttons &= ~(SDL_BUTTON(SDL_BUTTON_MIDDLE) | SDL_BUTTON(SDL_BUTTON_RIGHT));
-	if (middlePressed)
-		buttons |= 1 << 2;
-	if (rightPressed)
-		buttons |= 1 << 1;
+	int keyIndex = KeyboardRead(key);
+	if (keyIndex != UNKNOWN_KEY) {
+		KeyboardState[keyIndex] = state;
+	}
+}
+
+static boolean CheckFullscreenToggle(SDL_Keysym sym)
+{
+	uint16_t flags = (KMOD_LALT | KMOD_RALT);
+#if defined(__MACOSX__)
+	flags |= (KMOD_LGUI | KMOD_RGUI);
+#endif
+	return (sym.scancode == SDL_SCANCODE_RETURN ||
+			sym.scancode == SDL_SCANCODE_KP_ENTER) &&
+		   (sym.mod & flags) != 0;
+}
+
+static boolean CheckScreenshot(SDL_Keysym sym)
+{
+	return (sym.sym == SDLK_PRINTSCREEN);
+}
+
+/*
+============================================================================
+
+                            Mouse Functions
+
+============================================================================
+*/
+
+static int MouseButtonState;
+static boolean IsMouseGrabbed = false;
+
+static boolean ShouldGrabMouse();
+static void SetShowCursor(boolean show);
+
+int IN_MouseButtons(void)
+{
+	int buttons = MouseButtonState;
+
+	// Clear out the mouse scroll wheel buttons once reported.
+	MouseButtonState &= ~((1 << 3) | (1 << 4));
 
 	return buttons;
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-//	IN_GetJoyDelta() - Returns the relative movement of the specified
-//		joystick (from +/-127)
-//
-///////////////////////////////////////////////////////////////////////////
+void IN_UpdateMouseGrab()
+{
+	boolean grab = ShouldGrabMouse();
+
+	if (grab && !IsMouseGrabbed) {
+		SetShowCursor(false);
+	}
+
+	if (!grab && IsMouseGrabbed) {
+		int winW, winH;
+
+		SetShowCursor(true);
+
+		// When releasing the mouse from grab, warp the mouse cursor to
+		// the bottom-right of the screen. This is a minimally distracting
+		// place for it to appear - we may only have released the grab
+		// because we're at an end of level intermission screen, for
+		// example.
+		VL_GetWindowSize(&winW, &winH);
+		VL_WarpMouseInWindow(winW - 16, winH - 16);
+		SDL_GetRelativeMouseState(NULL, NULL);
+	}
+
+	IsMouseGrabbed = grab;
+}
+
+boolean IN_IsInputGrabbed()
+{
+	return IsMouseGrabbed;
+}
+
+static boolean ShouldGrabMouse()
+{
+	if (!VL_GetWindowFocus()) {
+		return false;
+	}
+
+	if (VL_GetFullscreen()) {
+		return true;
+	}
+
+	if (!forcegrabmouse) {
+		return false;
+	}
+
+	if (Paused || inmenu) {
+		return false;
+	}
+
+	return ingame && !demoplayback;
+}
+
+static void SetShowCursor(boolean show)
+{
+	// When the cursor is hidden, grab the input.
+	// Relative mode implicitly hides the cursor.
+	SDL_SetRelativeMouseMode(show ? SDL_FALSE : SDL_TRUE);
+	SDL_GetRelativeMouseState(NULL, NULL);
+}
+
+static void UpdateMouseButtonState(unsigned int button, boolean on)
+{
+	// Note: button "0" is left, button "1" is right,
+	// button "2" is middle for the game.  This is different
+	// to how SDL sees things.
+	switch (button) {
+	case SDL_BUTTON_LEFT:
+		button = 0;
+		break;
+
+	case SDL_BUTTON_RIGHT:
+		button = 1;
+		break;
+
+	case SDL_BUTTON_MIDDLE:
+		button = 2;
+		break;
+
+	default:
+		return;
+	}
+
+	// Turn bit representing this button on or off.
+	if (on) {
+		MouseButtonState |= (1 << button);
+	} else {
+		MouseButtonState &= ~(1 << button);
+	}
+}
+
+static void MapMouseWheelToButtons(SDL_MouseWheelEvent *wheel)
+{
+	// SDL2 distinguishes button events from mouse wheel events.
+	// We want to treat the mouse wheel as two buttons, as per SDL1.
+	int button;
+
+	if (wheel->y <= 0) { // scroll down
+		button = 4;
+	} else { // scroll up
+		button = 3;
+	}
+
+	MouseButtonState |= (1 << button);
+}
+
+/*
+============================================================================
+
+                            Joystick Functions
+
+============================================================================
+*/
+
+static SDL_Joystick *Joystick;
+static int JoyNumHats;
+
+boolean IN_JoyPresent()
+{
+	return Joystick != NULL;
+}
+
+int IN_JoyButtons(void)
+{
+	if (!Joystick)
+		return 0;
+
+	SDL_JoystickUpdate();
+
+	int res = 0;
+	for (int i = 0; i < JoyNumButtons && i < 32; i++) {
+		res |= SDL_JoystickGetButton(Joystick, i) << i;
+	}
+
+	return res;
+}
+
+// IN_GetJoyDelta() - Returns the relative movement of the specified
+// joystick (from -/+127).
 void IN_GetJoyDelta(int *dx, int *dy)
 {
 	if (!Joystick) {
@@ -475,44 +624,18 @@ void IN_GetJoyDelta(int *dx, int *dy)
 	*dy = y;
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-//	IN_GetJoyFineDelta() - Returns the relative movement of the specified
-//		joystick without dividing the results by 256 (from +/-127)
-//
-///////////////////////////////////////////////////////////////////////////
-void IN_GetJoyFineDelta(int *dx, int *dy)
-{
-	if (!Joystick) {
-		*dx = 0;
-		*dy = 0;
-		return;
-	}
+/*
+============================================================================
 
-	SDL_JoystickUpdate();
-	int x = SDL_JoystickGetAxis(Joystick, 0);
-	int y = SDL_JoystickGetAxis(Joystick, 1);
+                        Game Controller Functions
 
-	if (x < -128)
-		x = -128;
-	else if (x > 127)
-		x = 127;
+============================================================================
+*/
 
-	if (y < -128)
-		y = -128;
-	else if (y > 127)
-		y = 127;
+static SDL_GameController *GameController;
 
-	*dx = x;
-	*dy = y;
-}
-
-///////////////////////////////////////////////////////////////////////////
-//
-//	IN_GetGameControllerJoyDelta() - Returns the relative movement of the specified
-//  GameController joysticks (from +/-127)
-//
-///////////////////////////////////////////////////////////////////////////
+// IN_GetGameControllerJoyDelta() - Returns the relative movement of the specified
+// GameController joysticks (from +/-127)
 void IN_GetGameControllerJoyDelta(int *dx, int *dy, GameControllerAxis axis)
 {
 	if (!GameController) {
@@ -539,12 +662,8 @@ void IN_GetGameControllerJoyDelta(int *dx, int *dy, GameControllerAxis axis)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-//	IN_GetGameControllerTriggerDelta() - Returns the relative movement of the specified
-//  GameController triggers (from +/-127)
-//
-///////////////////////////////////////////////////////////////////////////
+// IN_GetGameControllerTriggerDelta() - Returns the relative movement of the specified
+// GameController triggers (from +/-127)
 void IN_GetGameControllerTriggerDelta(int *dl, int *dr)
 {
 	if (!GameController) {
@@ -562,46 +681,6 @@ void IN_GetGameControllerTriggerDelta(int *dl, int *dr)
 		  8;
 }
 
-boolean IN_GameControllerPresent()
-{
-	return GameController != NULL;
-}
-
-/*
-===================
-=
-= IN_JoyButtons
-=
-===================
-*/
-
-int IN_JoyButtons()
-{
-	int i;
-
-	if (!Joystick)
-		return 0;
-
-	SDL_JoystickUpdate();
-
-	int res = 0;
-	for (i = 0; i < JoyNumButtons && i < 32; i++)
-		res |= SDL_JoystickGetButton(Joystick, i) << i;
-	return res;
-}
-
-boolean IN_JoyPresent()
-{
-	return Joystick != NULL;
-}
-
-/*
-===================
-=
-= IN_GameControllerButtons
-=
-===================
-*/
 int IN_GameControllerButtons()
 {
 	if (!GameController) {
@@ -618,45 +697,98 @@ int IN_GameControllerButtons()
 	return res;
 }
 
-static void processEvent(SDL_Event *event)
+boolean IN_GameControllerPresent()
+{
+	return GameController != NULL;
+}
+
+/*
+============================================================================
+
+                        Event Handling Functions
+
+============================================================================
+*/
+
+static void HandleKeyEvent(SDL_Event *sdlevent);
+static void HandleMouseEvent(SDL_Event *sdlevent);
+static void HandleGameControllerEvent(SDL_Event *sdlevent);
+
+static void ProcessEvent(SDL_Event *event)
 {
 	switch (event->type) {
-	// exit if the window is closed
 	case SDL_QUIT:
 		Quit(NULL);
 
-	// check for keypresses
+	case SDL_WINDOWEVENT_FOCUS_GAINED:
+	case SDL_WINDOWEVENT_FOCUS_LOST:
+		VL_HandleWindowEvent(event);
+		break;
+
+	case SDL_KEYDOWN:
+	case SDL_KEYUP:
+		HandleKeyEvent(event);
+		break;
+
+	case SDL_MOUSEBUTTONDOWN:
+	case SDL_MOUSEBUTTONUP:
+	case SDL_MOUSEWHEEL:
+		if (MousePresent) {
+			HandleMouseEvent(event);
+		}
+		break;
+
+	case SDL_CONTROLLERDEVICEADDED:
+	case SDL_CONTROLLERDEVICEREMOVED:
+		HandleGameControllerEvent(event);
+		break;
+	}
+}
+
+void IN_WaitAndProcessEvents()
+{
+	SDL_Event event;
+	if (!SDL_WaitEvent(&event))
+		return;
+	do {
+		ProcessEvent(&event);
+	} while (SDL_PollEvent(&event));
+}
+
+void IN_ProcessEvents()
+{
+	SDL_Event event;
+
+	while (SDL_PollEvent(&event)) {
+		ProcessEvent(&event);
+	}
+}
+
+static void HandleKeyEvent(SDL_Event *sdlevent)
+{
+	switch (sdlevent->type) {
 	case SDL_KEYDOWN: {
-		if (event->key.keysym.sym == SDLK_SCROLLLOCK ||
-			event->key.keysym.sym == SDLK_F12) {
-			GrabInput = !GrabInput;
-			SDL_SetRelativeMouseMode(GrabInput ? SDL_TRUE : SDL_FALSE);
+		if (CheckFullscreenToggle(sdlevent->key.keysym)) {
+			VL_SetFullscreen(!VL_GetFullscreen());
+			if (VL_Apply() != 0) {
+				LOG_Error("Failed to apply crispy video settings!");
+			}
+
+			IN_UpdateMouseGrab();
 			return;
 		}
 
-		LastScan = event->key.keysym.sym;
+		if (CheckScreenshot(sdlevent->key.keysym)) {
+			VL_Screenshot((const char *)configdir);
+			return;
+		}
+
+		LastScan = sdlevent->key.keysym.sym;
 		SDL_Keymod mod = SDL_GetModState();
 
-		if (Keyboard(sc_Alt)) {
+		if (IN_KeyDown(sc_Alt)) {
 			if (LastScan == SDLK_F4)
 				Quit(NULL);
-
-			if (LastScan == SDLK_RETURN) {
-				crispyVideoSetFullscreen(!crispyVideoGetFullscreen());
-				if (crispyVideoApply() != 0) {
-					crispyLogError("Failed to apply crispy video settings!");
-				}
-
-				bool grabMouse = crispyVideoGetFullscreen() || forcegrabmouse;
-				GrabInput = grabMouse;
-				SDL_SetRelativeMouseMode(grabMouse);
-				return;
-			}
-		}
-
-		if (LastScan == SDLK_PRINTSCREEN && !Keyboard(sc_PrintScreen)) {
-			crispyVideoScreenshot((const char *)configdir);
-			return;
 		}
 
 		if (LastScan == SDLK_KP_ENTER)
@@ -698,16 +830,13 @@ static void processEvent(SDL_Event *event)
 				LastASCII = ASCIINames[sym];
 		}
 
-		int intLastScan = LastScan;
-		KeyboardSet(intLastScan, 1);
+		KeyboardSet(LastScan, true);
 
 		if (LastScan == SDLK_PAUSE)
 			Paused = true;
-		break;
-	}
-
+	} break;
 	case SDL_KEYUP: {
-		int key = event->key.keysym.sym;
+		int key = sdlevent->key.keysym.sym;
 		if (key == SDLK_KP_ENTER)
 			key = SDLK_RETURN;
 		else if (key == SDLK_RSHIFT)
@@ -735,56 +864,68 @@ static void processEvent(SDL_Event *event)
 			}
 		}
 
-		KeyboardSet(key, 0);
+		KeyboardSet(key, false);
+	} break;
 	}
-		// check for game controller events
-	case SDL_CONTROLLERDEVICEADDED: {
-		if (!GameController) {
-			int id = event->cdevice.which;
-			if (SDL_IsGameController(id)) {
-				GameController = SDL_GameControllerOpen(id);
-				crispyLogInfo("SDL GameController '%s' connected",
-							  SDL_GameControllerName(GameController));
+}
+
+static void HandleMouseEvent(SDL_Event *sdlevent)
+{
+	switch (sdlevent->type) {
+	case SDL_MOUSEBUTTONDOWN:
+		UpdateMouseButtonState(sdlevent->button.button, true);
+		break;
+
+	case SDL_MOUSEBUTTONUP:
+		UpdateMouseButtonState(sdlevent->button.button, false);
+		break;
+
+	case SDL_MOUSEWHEEL:
+		MapMouseWheelToButtons(&(sdlevent->wheel));
+		break;
+
+	default:
+		break;
+	}
+}
+
+static void HandleGameControllerEvent(SDL_Event *sdlevent)
+{
+	{
+		switch (sdlevent->type) {
+		case SDL_CONTROLLERDEVICEADDED: {
+			if (!GameController) {
+				int id = sdlevent->cdevice.which;
+				if (SDL_IsGameController(id)) {
+					GameController = SDL_GameControllerOpen(id);
+					LOG_Info("SDL GameController '%s' connected",
+							 SDL_GameControllerName(GameController));
+				}
 			}
+			break;
 		}
-		break;
-	}
-	case SDL_CONTROLLERDEVICEREMOVED: {
-		if (GameController) {
-			crispyLogInfo("SDL GameController '%s' disconnected",
-						  SDL_GameControllerName(GameController));
-			SDL_GameControllerClose(GameController);
-			GameController = NULL;
+		case SDL_CONTROLLERDEVICEREMOVED: {
+			if (GameController) {
+				LOG_Info("SDL GameController '%s' disconnected",
+						 SDL_GameControllerName(GameController));
+				SDL_GameControllerClose(GameController);
+				GameController = NULL;
+			}
+			break;
 		}
-		break;
-	}
-	}
-}
-
-void IN_WaitAndProcessEvents()
-{
-	SDL_Event event;
-	if (!SDL_WaitEvent(&event))
-		return;
-	do {
-		processEvent(&event);
-	} while (SDL_PollEvent(&event));
-}
-
-void IN_ProcessEvents()
-{
-	SDL_Event event;
-
-	while (SDL_PollEvent(&event)) {
-		processEvent(&event);
+		}
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-//	IN_Startup() - Starts up the Input Mgr
-//
-///////////////////////////////////////////////////////////////////////////
+/*
+============================================================================
+
+                    Startup, Shutdown and Misc Functions
+
+============================================================================
+*/
+
+// IN_Startup() - Starts up the Input Mgr
 void IN_Startup(void)
 {
 	if (IN_Started)
@@ -809,23 +950,16 @@ void IN_Startup(void)
 
 	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
 
-	if (g_crispyConfigFullscreen || forcegrabmouse) {
-		GrabInput = true;
-		SDL_SetRelativeMouseMode(SDL_TRUE);
-	}
-
 	// I didn't find a way to ask libSDL whether a mouse is present, yet...
 	// TODO(Anthony): Ensure this is false for console versions
 	MousePresent = true;
 
+	IN_UpdateMouseGrab();
+
 	IN_Started = true;
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-//	IN_Shutdown() - Shuts down the Input Mgr
-//
-///////////////////////////////////////////////////////////////////////////
+// IN_Shutdown() - Shuts down the Input Mgr.
 void IN_Shutdown(void)
 {
 	if (!IN_Started)
@@ -840,24 +974,8 @@ void IN_Shutdown(void)
 	IN_Started = false;
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-//	IN_ClearKeysDown() - Clears the keyboard array
-//
-///////////////////////////////////////////////////////////////////////////
-void IN_ClearKeysDown(void)
-{
-	LastScan = sc_None;
-	LastASCII = key_None;
-	memset((void *)KeyboardState, 0, sizeof(KeyboardState));
-}
-
-///////////////////////////////////////////////////////////////////////////
-//
-//	IN_ReadControl() - Reads the device associated with the specified
-//		player and fills in the control info struct
-//
-///////////////////////////////////////////////////////////////////////////
+// IN_ReadControl() - Reads the device associated with the specified
+// player and fills in the control info struct.
 void IN_ReadControl(int player, ControlInfo *info)
 {
 	word buttons;
@@ -870,28 +988,28 @@ void IN_ReadControl(int player, ControlInfo *info)
 
 	IN_ProcessEvents();
 
-	if (Keyboard(KbdDefs.upleft))
+	if (IN_KeyDown(KbdDefs.upleft))
 		mx = motion_Left, my = motion_Up;
-	else if (Keyboard(KbdDefs.upright))
+	else if (IN_KeyDown(KbdDefs.upright))
 		mx = motion_Right, my = motion_Up;
-	else if (Keyboard(KbdDefs.downleft))
+	else if (IN_KeyDown(KbdDefs.downleft))
 		mx = motion_Left, my = motion_Down;
-	else if (Keyboard(KbdDefs.downright))
+	else if (IN_KeyDown(KbdDefs.downright))
 		mx = motion_Right, my = motion_Down;
 
-	if (Keyboard(KbdDefs.up))
+	if (IN_KeyDown(KbdDefs.up))
 		my = motion_Up;
-	else if (Keyboard(KbdDefs.down))
+	else if (IN_KeyDown(KbdDefs.down))
 		my = motion_Down;
 
-	if (Keyboard(KbdDefs.left))
+	if (IN_KeyDown(KbdDefs.left))
 		mx = motion_Left;
-	else if (Keyboard(KbdDefs.right))
+	else if (IN_KeyDown(KbdDefs.right))
 		mx = motion_Right;
 
-	if (Keyboard(KbdDefs.button0))
+	if (IN_KeyDown(KbdDefs.button0))
 		buttons += 1 << 0;
-	if (Keyboard(KbdDefs.button1))
+	if (IN_KeyDown(KbdDefs.button1))
 		buttons += 1 << 1;
 
 	dx = mx * 127;
@@ -908,12 +1026,8 @@ void IN_ReadControl(int player, ControlInfo *info)
 	info->dir = DirTable[((my + 1) * 3) + (mx + 1)];
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-//	IN_WaitForKey() - Waits for a scan code, then clears LastScan and
-//		returns the scan code
-//
-///////////////////////////////////////////////////////////////////////////
+// IN_WaitForKey() - Waits for a scan code, then clears LastScan and
+// returns the scan code.
 ScanCode IN_WaitForKey(void)
 {
 	ScanCode result;
@@ -924,12 +1038,8 @@ ScanCode IN_WaitForKey(void)
 	return (result);
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-//	IN_WaitForASCII() - Waits for an ASCII char, then clears LastASCII and
-//		returns the ASCII value
-//
-///////////////////////////////////////////////////////////////////////////
+// IN_WaitForASCII() - Waits for an ASCII char, then clears LastASCII and
+// returns the ASCII value.
 char IN_WaitForASCII(void)
 {
 	char result;
@@ -940,13 +1050,8 @@ char IN_WaitForASCII(void)
 	return (result);
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-//	IN_Ack() - waits for a button or key press.  If a button is down, upon
+// IN_Ack() - waits for a button or key press.  If a button is down, upon
 // calling, it must be released for it to be recognized
-//
-///////////////////////////////////////////////////////////////////////////
-
 boolean btnstate[NUMBUTTONS];
 
 void IN_StartAck(void)
@@ -1022,14 +1127,10 @@ void IN_Ack(void)
 	} while (!IN_CheckAck());
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-//	IN_UserInput() - Waits for the specified delay time (in ticks) or the
-//		user pressing a key or a mouse button. If the clear flag is set, it
-//		then either clears the key or waits for the user to let the mouse
-//		button up.
-//
-///////////////////////////////////////////////////////////////////////////
+// IN_UserInput() - Waits for the specified delay time (in ticks) or the
+// user pressing a key or a mouse button. If the clear flag is set, it
+// then either clears the key or waits for the user to let the mouse
+// button up.
 boolean IN_UserInput(longword delay)
 {
 	longword lasttime;
@@ -1043,26 +1144,4 @@ boolean IN_UserInput(longword delay)
 		SDL_Delay(5);
 	} while (GetTimeCount() - lasttime < delay);
 	return (false);
-}
-
-//===========================================================================
-
-/*
-===================
-=
-= IN_MouseButtons
-=
-===================
-*/
-int IN_MouseButtons(void)
-{
-	if (MousePresent)
-		return INL_GetMouseButtons();
-	else
-		return 0;
-}
-
-boolean IN_IsInputGrabbed()
-{
-	return GrabInput;
 }

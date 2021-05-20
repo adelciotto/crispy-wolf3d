@@ -8,13 +8,11 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 file(GLOB SOURCE_FILES
 		${PROJECT_SOURCE_DIR}/src/mame/*.c
 		${PROJECT_SOURCE_DIR}/src/dosbox/*.c
-        ${PROJECT_SOURCE_DIR}/src/crispy/*.c
         ${PROJECT_SOURCE_DIR}/src/*.c)
 file(GLOB HEADER_FILES
         ${PROJECT_SOURCE_DIR}/src/mame/*.h
         ${PROJECT_SOURCE_DIR}/src/dosbox/*.h
         ${PROJECT_SOURCE_DIR}/src/stb/*.h
-        ${PROJECT_SOURCE_DIR}/src/crispy/*.h
         ${PROJECT_SOURCE_DIR}/src/*.h)
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 

@@ -1465,7 +1465,7 @@ void ThreeDRefresh(void)
 			spotvis[player->tilex][player->tiley] =
 					true; // Detect all sprites over player fix
 
-	vbuf = VL_LockSurface(screenBuffer);
+	vbuf = VL_LockSurface(screenSurface);
 	if (vbuf == NULL)
 		return;
 
@@ -1487,10 +1487,10 @@ void ThreeDRefresh(void)
 
 	DrawPlayerWeapon(); // draw player's hands
 
-	if (Keyboard(sc_Tab) && viewsize == 21 && gamestate.weapon != -1)
+	if (IN_KeyDown(sc_Tab) && viewsize == 21 && gamestate.weapon != -1)
 		ShowActStatus();
 
-	VL_UnlockSurface(screenBuffer);
+	VL_UnlockSurface(screenSurface);
 	vbuf = NULL;
 
 	//
@@ -1498,7 +1498,7 @@ void ThreeDRefresh(void)
 	//
 
 	if (fizzlein) {
-		FizzleFade(screenBuffer, 0, 0, screenWidth, screenHeight, 20, false);
+		FizzleFade(screenSurface, 0, 0, screenWidth, screenHeight, 20, false);
 		fizzlein = false;
 
 		lasttimecount = GetTimeCount(); // don't make a big tic count

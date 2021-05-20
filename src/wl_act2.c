@@ -3979,7 +3979,7 @@ void A_StartDeathCam(objtype *ob)
 									screenHeight - scaleFactor * STATUSLINES :
 									screenHeight;
 	VL_BarScaledCoord(0, 0, screenWidth, fadeheight, bordercol);
-	FizzleFade(screenBuffer, 0, 0, screenWidth, fadeheight, 70, false);
+	FizzleFade(screenSurface, 0, 0, screenWidth, fadeheight, 70, false);
 
 	if (bordercol != VIEWCOLOR) {
 		fontnumber = 1;

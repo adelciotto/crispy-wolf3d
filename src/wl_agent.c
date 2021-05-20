@@ -1,7 +1,7 @@
 // WL_AGENT.C
 
 #include "wl_def.h"
-#include "crispy/config.h"
+#include "id_config.h"
 
 #pragma hdrstop
 
@@ -202,7 +202,7 @@ void ControlMovement(objtype *ob)
 		// not strafing
 		//
 		anglefrac += controlx;
-		if (g_crispyConfigModernKeyboardMouse)
+		if (ConfigOptionModernKeyboardMouse)
 			anglefrac += modernMouseControlX;
 
 		angleunits = anglefrac / ANGLESCALE;

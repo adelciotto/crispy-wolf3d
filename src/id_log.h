@@ -1,26 +1,26 @@
-#ifndef CRISPY_WOLF3D_LOG_H
-#define CRISPY_WOLF3D_LOG_H
+#ifndef CRISPY_WOLF3D_ID_LOG_H
+#define CRISPY_WOLF3D_ID_LOG_H
 
 #include "SDL_log.h"
 
-#define crispyLogDebug(fmt, ...)                                               \
+#define LOG_Debug(fmt, ...)                                                    \
 	SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_DEBUG,       \
 				   "%s(), %s:%d " fmt, __func__, __FILE__, __LINE__,           \
 				   ##__VA_ARGS__)
 
-#define crispyLogInfo(fmt, ...)                                                \
+#define LOG_Info(fmt, ...)                                                     \
 	SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO,        \
 				   "%s(), %s:%d " fmt, __func__, __FILE__, __LINE__,           \
 				   ##__VA_ARGS__)
 
-#define crispyLogWarn(fmt, ...)                                                \
+#define LOG_Warn(fmt, ...)                                                     \
 	SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_WARN,        \
 				   "%s(), %s:%d " fmt, __func__, __FILE__, __LINE__,           \
 				   ##__VA_ARGS__)
 
-#define crispyLogError(fmt, ...)                                               \
+#define LOG_Error(fmt, ...)                                                    \
 	SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_ERROR,       \
 				   "%s(), %s:%d " fmt, __func__, __FILE__, __LINE__,           \
 				   ##__VA_ARGS__)
 
-#endif // CRISPY_WOLF3D_LOG_H
+#endif //CRISPY_WOLF3D_ID_LOG_H

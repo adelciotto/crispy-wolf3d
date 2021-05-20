@@ -78,7 +78,7 @@ void VWB_Vlin(int y1, int y2, int x, int color);
 
 void VH_UpdateScreen(SDL_Surface *surface);
 
-#define VW_UpdateScreen() VH_UpdateScreen(screenBuffer)
+#define VW_UpdateScreen() VH_UpdateScreen(screenSurface)
 
 //
 // wolfenstein EGA compatability stuff

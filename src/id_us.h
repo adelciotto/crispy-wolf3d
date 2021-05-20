@@ -42,8 +42,9 @@ typedef struct {
 	int x, y, w, h, px, py;
 } WindowRec; // Record used to save & restore screen windows
 
-extern boolean ingame, // Set by game code if a game is in progress
-		loadedgame; // Set if the current game was loaded
+extern boolean ingame; // Set by game code if a game is in progress
+extern boolean loadedgame; // Set if the current game was loaded
+extern boolean inmenu; // Set if the menu is active
 extern word PrintX, PrintY; // Current printing location in the window
 extern word WindowX, WindowY, // Current location of window
 		WindowW, WindowH; // Current size of window

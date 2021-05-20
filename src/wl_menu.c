@@ -239,6 +239,8 @@ int color_norml[] = { DEACTIVE, TEXTCOLOR, READCOLOR, 0x6b };
 
 int EpisodeSelect[6] = { 1 };
 
+boolean inmenu = false;
+
 static int SaveGamesAvail[10];
 static int StartGame;
 static int SoundStatus = 1;
@@ -426,7 +428,7 @@ void US_ControlPanel(ScanCode scancode)
 		//
 		// EASTER EGG FOR SPEAR OF DESTINY!
 		//
-		if (Keyboard(sc_I) && Keyboard(sc_D)) {
+		if (IN_KeyDown(sc_I) && IN_KeyDown(sc_D)) {
 			VW_FadeOut();
 			StartCPMusic(XJAZNAZI_MUS);
 			ClearMemory();
@@ -440,7 +442,7 @@ void US_ControlPanel(ScanCode scancode)
 			VL_ConvertPalette(grsegs[IDGUYSPALETTE], pal, 256);
 			VL_FadeIn(0, 255, pal, 30);
 
-			while (Keyboard(sc_I) || Keyboard(sc_D))
+			while (IN_KeyDown(sc_I) || IN_KeyDown(sc_D))
 				IN_WaitAndProcessEvents();
 			IN_ClearKeysDown();
 			IN_Ack();
@@ -1673,9 +1675,9 @@ int MouseSensitivity(int blank)
 			break;
 		}
 
-		if (ci.button0 || Keyboard(sc_Space) || Keyboard(sc_Enter))
+		if (ci.button0 || IN_KeyDown(sc_Space) || IN_KeyDown(sc_Enter))
 			exit = 1;
-		else if (ci.button1 || Keyboard(sc_Escape))
+		else if (ci.button1 || IN_KeyDown(sc_Escape))
 			exit = 2;
 
 	} while (!exit);
@@ -2466,9 +2468,9 @@ int CP_ChangeView(int blank)
 			break;
 		}
 
-		if (ci.button0 || Keyboard(sc_Enter))
+		if (ci.button0 || IN_KeyDown(sc_Enter))
 			exit = 1;
-		else if (ci.button1 || Keyboard(sc_Escape)) {
+		else if (ci.button1 || IN_KeyDown(sc_Escape)) {
 			SD_PlaySound(ESCPRESSEDSND);
 			MenuFadeOut();
 			if (screenHeight % 200 != 0)
@@ -2696,6 +2698,9 @@ void SetupControlPanel(void)
 		CA_LoadAllSounds();
 	else
 		MainMenu[savegame].active = 1;
+
+	inmenu = true;
+	IN_UpdateMouseGrab();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -2737,6 +2742,7 @@ void SetupSaveGames()
 void CleanupControlPanel(void)
 {
 	fontnumber = 0;
+	inmenu = false;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -2903,10 +2909,10 @@ int HandleMenu(CP_iteminfo *item_i, CP_itemtype *items, void (*routine)(int w))
 			break;
 		}
 
-		if (ci.button0 || Keyboard(sc_Space) || Keyboard(sc_Enter))
+		if (ci.button0 || IN_KeyDown(sc_Space) || IN_KeyDown(sc_Enter))
 			exit = 1;
 
-		if (ci.button1 && !Keyboard(sc_Alt) || Keyboard(sc_Escape))
+		if (ci.button1 && !IN_KeyDown(sc_Alt) || IN_KeyDown(sc_Escape))
 			exit = 2;
 
 	} while (!exit);
@@ -3070,9 +3076,9 @@ void WaitKeyUp(void)
 {
 	ControlInfo ci;
 	while (ReadAnyControl(&ci), ci.button0 | ci.button1 | ci.button2 |
-										ci.button3 | Keyboard(sc_Space) |
-										Keyboard(sc_Enter) |
-										Keyboard(sc_Escape)) {
+										ci.button3 | IN_KeyDown(sc_Space) |
+										IN_KeyDown(sc_Enter) |
+										IN_KeyDown(sc_Escape)) {
 		IN_WaitAndProcessEvents();
 	}
 }
@@ -3224,19 +3230,19 @@ int Confirm(const char *string)
 			SDL_Delay(5);
 
 #ifdef SPANISH
-	} while (!Keyboard(sc_S) && !Keyboard(sc_N) && !Keyboard(sc_Escape));
+	} while (!IN_KeyDown(sc_S) && !IN_KeyDown(sc_N) && !IN_KeyDown(sc_Escape));
 #else
-	} while (!Keyboard(sc_Y) && !Keyboard(sc_N) && !Keyboard(sc_Escape) &&
+	} while (!IN_KeyDown(sc_Y) && !IN_KeyDown(sc_N) && !IN_KeyDown(sc_Escape) &&
 			 !ci.button0 && !ci.button1);
 #endif
 
 #ifdef SPANISH
-	if (Keyboard(sc_S) || ci.button0) {
+	if (IN_KeyDown(sc_S) || ci.button0) {
 		xit = 1;
 		ShootSnd();
 	}
 #else
-	if (Keyboard(sc_Y) || ci.button0) {
+	if (IN_KeyDown(sc_Y) || ci.button0) {
 		xit = 1;
 		ShootSnd();
 	}
@@ -3269,28 +3275,28 @@ int GetYorN(int x, int y, int pic)
 		IN_WaitAndProcessEvents();
 	}
 #ifdef SPANISH
-	while (!Keyboard(sc_S) && !Keyboard(sc_N) && !Keyboard(sc_Escape));
+	while (!IN_KeyDown(sc_S) && !IN_KeyDown(sc_N) && !IN_KeyDown(sc_Escape));
 #else
-	while (!Keyboard(sc_Y) && !Keyboard(sc_N) && !Keyboard(sc_Escape));
+	while (!IN_KeyDown(sc_Y) && !IN_KeyDown(sc_N) && !IN_KeyDown(sc_Escape));
 #endif
 
 #ifdef SPANISH
-	if (Keyboard(sc_S)) {
+	if (IN_KeyDown(sc_S)) {
 		xit = 1;
 		ShootSnd();
 	}
 
-	while (Keyboard(sc_S) || Keyboard(sc_N) || Keyboard(sc_Escape))
+	while (IN_KeyDown(sc_S) || IN_KeyDown(sc_N) || IN_KeyDown(sc_Escape))
 		IN_WaitAndProcessEvents();
 
 #else
 
-	if (Keyboard(sc_Y)) {
+	if (IN_KeyDown(sc_Y)) {
 		xit = 1;
 		ShootSnd();
 	}
 
-	while (Keyboard(sc_Y) || Keyboard(sc_N) || Keyboard(sc_Escape))
+	while (IN_KeyDown(sc_Y) || IN_KeyDown(sc_N) || IN_KeyDown(sc_Escape))
 		IN_WaitAndProcessEvents();
 #endif
 

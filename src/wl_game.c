@@ -1306,7 +1306,7 @@ void Died(void)
 
 	IN_ClearKeysDown();
 
-	FizzleFade(screenBuffer, viewscreenx, viewscreeny, viewwidth, viewheight,
+	FizzleFade(screenSurface, viewscreenx, viewscreeny, viewwidth, viewheight,
 			   70, false);
 
 	IN_UserInput(100);

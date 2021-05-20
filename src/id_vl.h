@@ -3,50 +3,28 @@
 #ifndef __ID_VL_H_
 #define __ID_VL_H_
 
-// wolf compatability
-
 void Quit(const char *error, ...);
 
-//===========================================================================
-
-#define CHARWIDTH 2
-#define TILEWIDTH 4
-
-//===========================================================================
-
-extern SDL_Surface *screen, *screenBuffer;
-#if SDL_MAJOR_VERSION == 2
-extern SDL_Window *window;
-extern SDL_Renderer *renderer;
-extern SDL_Texture *texture;
-#endif
-
-extern boolean usedoublebuffering;
-extern unsigned screenWidth, screenHeight, screenPitch, bufferPitch;
+extern SDL_Surface *screenSurface;
+extern SDL_Surface *rgbaSurface;
+extern int screenWidth, screenHeight;
+extern int bufferPitch;
 extern int screenBits;
 extern int scaleFactor;
 
+extern boolean usedoublebuffering;
 extern boolean screenfaded;
-extern unsigned bordercolor;
-
 extern uint32_t *ylookup;
-
 extern SDL_Color gamepal[256];
 
 //===========================================================================
 
-//
-// VGA hardware routines
-//
-
 #define VL_WaitVBL(a) SDL_Delay((a)*8)
-#define VL_ClearScreen(c) SDL_FillRect(screenBuffer, NULL, (c))
+#define VL_ClearScreen(c) SDL_FillRect(screenSurface, NULL, (c))
 
 void VL_DePlaneVGA(byte *source, int width, int height);
 
 void VL_SetVGAPlaneMode(void);
-
-void VL_SetTextMode(void);
 
 void VL_Shutdown(void);
 
@@ -54,11 +32,7 @@ void VL_ConvertPalette(byte *srcpal, SDL_Color *destpal, int numColors);
 
 void VL_FillPalette(int red, int green, int blue);
 
-void VL_SetColor(int color, int red, int green, int blue);
-
-void VL_GetColor(int color, int *red, int *green, int *blue);
-
-void VL_SetPalette(SDL_Color *palette, bool forceupdate);
+void VL_SetPalette(SDL_Color *palette, boolean forceupdate);
 
 void VL_GetPalette(SDL_Color *palette);
 
@@ -82,8 +56,6 @@ void VL_BarScaledCoord(int scx, int scy, int scwidth, int scheight, int color);
 
 void VL_Bar(int x, int y, int width, int height, int color);
 
-void VL_DrawPicBare(int x, int y, byte *pic, int width, int height);
-
 void VL_ScreenToScreen(SDL_Surface *source, SDL_Surface *dest);
 
 void VL_MemToScreenScaledCoord(byte *source, int width, int height, int scx,
@@ -94,5 +66,33 @@ void VL_MemToScreenScaledCoord2(byte *source, int origwidth, int origheight,
 								int width, int height);
 
 void VL_MemToScreen(byte *source, int width, int height, int x, int y);
+
+void VL_HandleWindowEvent(SDL_Event *sdlevent);
+
+void VL_SetPaletteColors(SDL_Color *colors, int first, int numColors);
+
+void VL_SwapSurfaces();
+
+void VL_Present();
+
+boolean VL_GetWindowFocus();
+
+void VL_SetWindowScale(int newWindowScale);
+
+void VL_SetHighRes(boolean highResOn);
+
+void VL_SetAspectRatioCorrection(boolean aspectRatioCorrectionOn);
+
+boolean VL_GetFullscreen();
+
+void VL_SetFullscreen(boolean fullscreenOn);
+
+int VL_Apply();
+
+void VL_GetWindowSize(int *outW, int *outH);
+
+void VL_WarpMouseInWindow(int x, int y);
+
+void VL_Screenshot(const char *configDir);
 
 #endif
