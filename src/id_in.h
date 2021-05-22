@@ -193,6 +193,8 @@ void IN_WaitAndProcessEvents();
 
 void IN_ProcessEvents();
 
+void IN_Ack(void);
+
 void IN_StartAck(void);
 
 boolean IN_CheckAck(void);
