@@ -112,7 +112,7 @@ static boolean IN_Started;
 */
 
 static int KeyboardRead(int key);
-static int KeyboardSet(int key, boolean state);
+static void KeyboardSet(int key, boolean state);
 
 void IN_ClearKeysDown(void)
 {
@@ -401,7 +401,7 @@ static int KeyboardRead(int key)
 	}
 }
 
-static int KeyboardSet(int key, boolean state)
+static void KeyboardSet(int key, boolean state)
 {
 	int keyIndex = KeyboardRead(key);
 	if (keyIndex != UNKNOWN_KEY) {
@@ -433,7 +433,7 @@ static boolean CheckScreenshot(SDL_Keysym sym)
 ============================================================================
 */
 
-static int MouseButtonState;
+static int MouseButtonState = 0;
 static boolean IsMouseGrabbed = false;
 
 static boolean ShouldGrabMouse();
@@ -545,10 +545,11 @@ static void MapMouseWheelToButtons(SDL_MouseWheelEvent *wheel)
 	// We want to treat the mouse wheel as two buttons, as per SDL1.
 	int button;
 
+	boolean flipped = wheel->direction == SDL_MOUSEWHEEL_FLIPPED;
 	if (wheel->y <= 0) { // scroll down
-		button = 4;
+		button = flipped ? 3 : 4;
 	} else { // scroll up
-		button = 3;
+		button = flipped ? 4 : 3;
 	}
 
 	MouseButtonState |= (1 << button);
@@ -723,6 +724,7 @@ static void ProcessEvent(SDL_Event *event)
 	case SDL_WINDOWEVENT_FOCUS_GAINED:
 	case SDL_WINDOWEVENT_FOCUS_LOST:
 		VL_HandleWindowEvent(event);
+		IN_UpdateMouseGrab();
 		break;
 
 	case SDL_KEYDOWN:

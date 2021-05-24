@@ -162,7 +162,8 @@ void ReadConfig(void)
 
 		read(file, dirscan, sizeof(dirscan));
 		read(file, buttonscan, sizeof(buttonscan));
-		read(file, buttonmouse, sizeof(buttonmouse));
+		// The original config only maps the first 3 buttons (left, middle, right).
+		read(file, buttonmouse, sizeof(int)*3);
 		read(file, buttonjoy, sizeof(buttonjoy));
 
 		read(file, &viewsize, sizeof(viewsize));
@@ -276,7 +277,8 @@ void WriteConfig(void)
 
 		write(file, dirscan, sizeof(dirscan));
 		write(file, buttonscan, sizeof(buttonscan));
-		write(file, buttonmouse, sizeof(buttonmouse));
+		// The original config only maps the first 3 buttons (left, middle, right).
+		write(file, buttonmouse, sizeof(int)*3);
 		write(file, buttonjoy, sizeof(buttonjoy));
 
 		write(file, &viewsize, sizeof(viewsize));
